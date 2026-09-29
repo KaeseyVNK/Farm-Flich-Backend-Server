@@ -1,0 +1,175 @@
+{
+  "common": {
+    "loading": "Loading…",
+    "start": "Start",
+    "back": "Back",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm"
+  },
+  "start": {
+    "title": "Masked Farm",
+    "subtitle": "A coastal farm at Tidecrest",
+    "story": "Seven spring days. Repair the well, tend the animals, bring a basket to the Tide Festival.",
+    "newGame": "New Game",
+    "continue": "Continue",
+    "loadingAssets": "Loading assets…",
+    "saveSlots": "Save slots",
+    "emptySlot": "Empty — start a new farm here",
+    "load": "Load",
+    "newFarm": "New",
+    "delete": "Delete",
+    "confirmDelete": "Confirm",
+    "continueLatest": "Continue latest farm",
+    "loginUpgrade": "Sign in / upgrade account",
+    "controls": "WASD to walk · Space to talk / sleep · walk into NHÀ LÀNG HANG BIỂN signs to change areas",
+    "newGamePlus": "New Game+ ({count} ending unlocked)"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "vietnamese": "Tiếng Việt",
+    "english": "English",
+    "audio": "Audio",
+    "ambient": "Ambient",
+    "muted": "Muted"
+  },
+  "credits": {
+    "assetsBy": "Assets by EmanuelleDev",
+    "assetsUrl": "emanuelledev.itch.io"
+  },
+  "hud": {
+    "energy": "Energy",
+    "gold": "Gold",
+    "time": "Time",
+    "day": "Day",
+    "sleep": "Sleep",
+    "home": "Go home",
+    "zoneFarm": "Tidecrest farm",
+    "zoneHouse": "Cottage",
+    "zoneVillage": "Village",
+    "zoneCave": "Old mine",
+    "zoneBeach": "Beach",
+    "pause": "Pause",
+    "resume": "Resume",
+    "year": "Year {year}",
+    "dayNum": "Day {day}",
+    "spring": "Spring",
+    "summer": "Summer",
+    "fall": "Fall",
+    "winter": "Winter",
+    "morning": "Morning",
+    "afternoon": "Afternoon",
+    "evening": "Evening",
+    "night": "Night",
+    "healthy": "Well",
+    "tired": "Tired",
+    "exhausted": "Worn out",
+    "depleted": "Collapsed",
+    "daylight": "Daylight",
+    "questToday": "Today",
+    "questDone": "Festival week done",
+    "questWhere": {
+      "q_first_harvest": "Plots west of the house",
+      "q_meet_village": "Village road — east gate",
+      "q_collect_egg": "Barnyard east",
+      "q_ore_for_alaric": "Cave north · dry well",
+      "q_festival_basket": "Gaston in the village"
+    },
+    "farmGoal": {
+      "hoe": {
+        "title": "Hoe plots",
+        "where": "West grid by the house"
+      },
+      "plant": {
+        "title": "Plant seeds",
+        "where": "West grid by the house"
+      },
+      "water": {
+        "title": "Water crops",
+        "where": "Pond if can is empty"
+      },
+      "harvest": {
+        "title": "Harvest",
+        "where": "West grid by the house"
+      },
+      "sell": {
+        "title": "Sell crops",
+        "where": "Shop (G)"
+      },
+      "unlock2": {
+        "title": "Reach level 2 — potatoes",
+        "where": "Grow & sell 6 parsnips"
+      },
+      "unlock3": {
+        "title": "Reach level 3 — hens + wheat",
+        "where": "Plant potatoes, keep selling"
+      },
+      "unlock4": {
+        "title": "Reach level 4 — cow",
+        "where": "Keep harvesting"
+      }
+    },
+    "tutorial": {
+      "kicker": "Guide",
+      "claim": "Claim reward",
+      "claimable": "✓ Done — claim reward!",
+      "done": "🎉 Guide complete — explore freely!",
+      "step": "Step {step}/14"
+    }
+  },
+  "cooking": {
+    "dialogLabel": "Kitchen",
+    "title": "Home Kitchen — Cooking",
+    "subtitle": "Ingredients from silo & bag · buffs when eaten",
+    "close": "Close",
+    "donePerfect": "PERFECT — dish ×2!",
+    "doneGood": "Cooked!",
+    "doneMiss": "A bit lonely… lost half the ingredients",
+    "tap": "Time it! (Space)",
+    "abandonTitle": "Abandon pot — ingredients kept",
+    "abandon": "Stop",
+    "continueCooking": "Keep cooking",
+    "quickCook": "Quick cook",
+    "minigameRounds": "Minigame {rounds} rounds",
+    "level": "Lv {level}",
+    "cook": "Cook",
+    "closeKitchen": "Close kitchen"
+  },
+  "social": {
+    "title": "Friends",
+    "friendInputPlaceholder": "User ID to add",
+    "addFriend": "Add friend",
+    "listHeading": "List ({count})",
+    "gift": "Gift",
+    "visit": "Visit",
+    "noFriends": "No friends yet.",
+    "needLogin": "Sign in to see visitors (server-only data).",
+    "loadFailed": "Failed to load — try again later. ({error})",
+    "loading": "Loading…",
+    "likesLabel": "Likes",
+    "today": "Today",
+    "visits": "Visits",
+    "stickersReceived": "Stickers received",
+    "noStickers": "No stickers yet.",
+    "guestbookTitle": "Guestbook (latest 50)",
+    "guestbookEmpty": "No messages yet — visit your friends' farms and leave a note!",
+    "updatedAt": "Updated {time} · refreshes every 30s",
+    "farmOf": "{name}'s farm",
+    "readOnly": "Read-only view — no interaction",
+    "likedCount": "{count} likes",
+    "like": "Like",
+    "likedToday": "Liked today",
+    "likeFarm": "Like this farm",
+    "oncePerDay": "Once per day",
+    "sendSticker": "Send sticker {id}",
+    "guestbookPlaceholder": "Message for the farm owner (≤200 chars)",
+    "guestbookInputLabel": "Guestbook message",
+    "sendGuestbook": "Send message",
+    "close": "Close",
+    "stickerSent": "Sticker sent!",
+    "guestbookSent": "Message left!",
+    "giftFor": "Gift {name}",
+    "cancel": "Cancel"
+  }
+}

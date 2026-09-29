@@ -1,0 +1,19 @@
+{
+  "name": "Harvest Hollow — Dark Fantasy Farm",
+  "short_name": "Harvest Hollow",
+  "description": "Cursed valley farming sim — farm by day, purge monsters by night. 3 endings.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#1a1410",
+  "theme_color": "#1a1410",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"]
+}

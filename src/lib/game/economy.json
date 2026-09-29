@@ -1,0 +1,270 @@
+{
+  "_comment": "Single source of truth for the Harvest Hollow economy. Buy = price player pays at the general store (100% of base). SellVendor = price Pierre/Robin pay the player for crops & goods (100% of base). SellShip = overnight shipping-box price (60% of base, Stardew-style). Seed prices are the buy price for seeds.",
+  "currency": "g",
+  "vendorRate": 1.0,
+  "shippingRate": 0.6,
+  "crops": {
+    "parsnip": {
+      "base": 35,
+      "seed": 20
+    },
+    "cauliflower": {
+      "base": 175,
+      "seed": 80
+    },
+    "potato": {
+      "base": 80,
+      "seed": 50
+    },
+    "tomato": {
+      "base": 60,
+      "seed": 50
+    },
+    "blueberry": {
+      "base": 50,
+      "seed": 40
+    },
+    "pumpkin": {
+      "base": 320,
+      "seed": 100
+    },
+    "carrot": {
+      "base": 55,
+      "seed": 30
+    },
+    "corn": {
+      "base": 50,
+      "seed": 40
+    },
+    "cabbage": {
+      "base": 70,
+      "seed": 40
+    },
+    "strawberry": {
+      "base": 90,
+      "seed": 60
+    },
+    "onion": {
+      "base": 45,
+      "seed": 30
+    },
+    "egg": {
+      "base": 50
+    },
+    "milk": {
+      "base": 80
+    }
+  },
+  "seeds": {
+    "parsnip_seed": {
+      "buy": 20,
+      "sell": 10
+    },
+    "cauliflower_seed": {
+      "buy": 80,
+      "sell": 40
+    },
+    "potato_seed": {
+      "buy": 50,
+      "sell": 25
+    },
+    "tomato_seed": {
+      "buy": 50,
+      "sell": 25
+    },
+    "blueberry_seed": {
+      "buy": 40,
+      "sell": 20
+    },
+    "pumpkin_seed": {
+      "buy": 100,
+      "sell": 50
+    },
+    "carrot_seed": {
+      "buy": 30,
+      "sell": 15
+    },
+    "corn_seed": {
+      "buy": 40,
+      "sell": 20
+    },
+    "cabbage_seed": {
+      "buy": 40,
+      "sell": 20
+    },
+    "strawberry_seed": {
+      "buy": 60,
+      "sell": 30
+    },
+    "onion_seed": {
+      "buy": 30,
+      "sell": 15
+    }
+  },
+  "resources": {
+    "wood": {
+      "base": 5
+    },
+    "stone": {
+      "base": 5
+    },
+    "fiber": {
+      "base": 3
+    },
+    "sap": {
+      "base": 2
+    },
+    "wheat": {
+      "base": 8,
+      "buy": 10
+    },
+    "copper_ore": {
+      "base": 15
+    },
+    "slime_jelly": {
+      "base": 18
+    },
+    "glow_mushroom": {
+      "base": 26
+    },
+    "forest_herb": {
+      "base": 34
+    },
+    "sprout_leaf": {
+      "base": 14
+    },
+    "sword": {
+      "base": 450,
+      "buy": 450
+    }
+  },
+  "forage": {
+    "dandelion": {
+      "base": 30
+    },
+    "leek": {
+      "base": 60
+    },
+    "mushroom": {
+      "base": 40
+    }
+  },
+  "food": {
+    "bread": {
+      "base": 60
+    },
+    "salad": {
+      "base": 110
+    },
+    "sunfish": {
+      "base": 25
+    },
+    "perch": {
+      "base": 30
+    },
+    "carp": {
+      "base": 60
+    },
+    "chub": {
+      "base": 65
+    },
+    "bass": {
+      "base": 35
+    },
+    "pike": {
+      "base": 85
+    },
+    "tiger_trout": {
+      "base": 160
+    },
+    "sturgeon": {
+      "base": 180
+    },
+    "anchovy": {
+      "base": 25
+    },
+    "sardine": {
+      "base": 40
+    },
+    "red_snapper": {
+      "base": 90
+    },
+    "tuna": {
+      "base": 220
+    },
+    "parsnip_soup": {
+      "base": 110
+    },
+    "boiled_egg": {
+      "base": 80
+    },
+    "baked_fish": {
+      "base": 55
+    },
+    "pancakes": {
+      "base": 110
+    },
+    "veggie_mix": {
+      "base": 260
+    },
+    "fruit_salad": {
+      "base": 290
+    },
+    "omelet": {
+      "base": 290
+    },
+    "fish_stew": {
+      "base": 180
+    },
+    "sashimi": {
+      "base": 340
+    },
+    "pumpkin_soup": {
+      "base": 620
+    },
+    "fish_tacos": {
+      "base": 150
+    },
+    "stuffed_peppers": {
+      "base": 260
+    },
+    "casserole": {
+      "base": 450
+    },
+    "complete_breakfast": {
+      "base": 420
+    },
+    "jelly_salad": {
+      "base": 120
+    },
+    "mushroom_risotto": {
+      "base": 260
+    },
+    "forest_herb_tea": {
+      "base": 150
+    },
+    "sprout_wrap": {
+      "base": 180
+    }
+  },
+  "crafts": {
+    "fence_item": {
+      "base": 5
+    },
+    "sprinkler": {
+      "base": 50
+    },
+    "shipping_box": {
+      "base": 15
+    },
+    "tool_lockpick": {
+      "sell": 50
+    },
+    "tool_smoke": {
+      "sell": 60
+    },
+    "tool_toy": {
+      "sell": 70
+    }
+  }
+}

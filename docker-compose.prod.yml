@@ -1,0 +1,40 @@
+# Docker compose — Masked Farm production alternative (phase 10 F10.7).
+# web (Next.js standalone) + raid (bun) + caddy reverse proxy.
+# Trade-off: ~50MB RAM overhead vs bare-metal PM2. Dùng khi multi-host hoặc cần reproduce env.
+# Start: `docker compose -f docker-compose.prod.yml up -d`
+# Env: mount .env.production (KHÔNG commit).
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    env_file: .env.production
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+  raid:
+    build:
+      context: .
+      dockerfile: Dockerfile.raid
+    env_file: .env.production
+    ports:
+      - "3001:3001"
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [web, raid]
+    restart: unless-stopped
+
+volumes:
+  caddy_data:
+  caddy_config:

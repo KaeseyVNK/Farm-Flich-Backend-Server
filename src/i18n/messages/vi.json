@@ -1,0 +1,175 @@
+{
+  "common": {
+    "loading": "Đang tải…",
+    "start": "Bắt đầu",
+    "back": "Quay lại",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "confirm": "Xác nhận"
+  },
+  "start": {
+    "title": "Masked Farm",
+    "subtitle": "Nông trại ven biển Tidecrest",
+    "story": "7 ngày Xuân. Sửa giếng, nuôi thú, mang giỏ đến Lễ Hội Thủy Triều.",
+    "newGame": "Trò chơi mới",
+    "continue": "Tiếp tục",
+    "loadingAssets": "Đang tải tài nguyên…",
+    "saveSlots": "Ô lưu game",
+    "emptySlot": "Trống — tạo nông trại mới ở đây",
+    "load": "Tải",
+    "newFarm": "Mới",
+    "delete": "Xóa",
+    "confirmDelete": "Xác nhận",
+    "continueLatest": "Tiếp tục nông trại gần nhất",
+    "loginUpgrade": "Đăng nhập / Nâng cấp tài khoản",
+    "controls": "WASD đi bộ · Space nói chuyện / ngủ · đi vào biển NHÀ LÀNG HANG BIỂN để đổi khu",
+    "newGamePlus": "New Game+ (đã mở {count} ending)"
+  },
+  "settings": {
+    "title": "Cài đặt",
+    "language": "Ngôn ngữ",
+    "vietnamese": "Tiếng Việt",
+    "english": "English",
+    "audio": "Âm thanh",
+    "ambient": "Âm thanh môi trường",
+    "muted": "Tắt tiếng"
+  },
+  "credits": {
+    "assetsBy": "Tài nguyên bởi EmanuelleDev",
+    "assetsUrl": "emanuelledev.itch.io"
+  },
+  "hud": {
+    "energy": "Thể lực",
+    "gold": "Vàng",
+    "time": "Giờ",
+    "day": "Ngày",
+    "sleep": "Ngủ",
+    "home": "Về nhà",
+    "zoneFarm": "Nông trại Tidecrest",
+    "zoneHouse": "Nhà",
+    "zoneVillage": "Làng",
+    "zoneCave": "Hang cũ",
+    "zoneBeach": "Bãi biển",
+    "pause": "Tạm dừng",
+    "resume": "Tiếp tục",
+    "year": "Năm {year}",
+    "dayNum": "Ngày {day}",
+    "spring": "Xuân",
+    "summer": "Hạ",
+    "fall": "Thu",
+    "winter": "Đông",
+    "morning": "Sáng",
+    "afternoon": "Chiều",
+    "evening": "Hoàng hôn",
+    "night": "Đêm",
+    "healthy": "Khỏe",
+    "tired": "Mệt",
+    "exhausted": "Kiệt sức",
+    "depleted": "Kiệt quệ",
+    "daylight": "Ánh sáng",
+    "questToday": "Việc hôm nay",
+    "questDone": "Tuần lễ hội xong",
+    "questWhere": {
+      "q_first_harvest": "Ruộng tây nhà",
+      "q_meet_village": "Đường làng — cửa đông",
+      "q_collect_egg": "Chuồng phía đông",
+      "q_ore_for_alaric": "Hang bắc · giếng cạn",
+      "q_festival_basket": "Gaston ở làng"
+    },
+    "farmGoal": {
+      "hoe": {
+        "title": "Cuốc ô ruộng",
+        "where": "Lưới tây nhà"
+      },
+      "plant": {
+        "title": "Gieo hạt",
+        "where": "Lưới tây nhà"
+      },
+      "water": {
+        "title": "Tưới ruộng",
+        "where": "Ao nếu bình cạn"
+      },
+      "harvest": {
+        "title": "Thu hoạch",
+        "where": "Lưới tây nhà"
+      },
+      "sell": {
+        "title": "Bán nông sản",
+        "where": "Cửa hàng (G)"
+      },
+      "unlock2": {
+        "title": "Lên cấp 2 — mở khoai",
+        "where": "Làm 6 ô parsnip rồi bán"
+      },
+      "unlock3": {
+        "title": "Lên cấp 3 — gà + lúa",
+        "where": "Trồng khoai, bán tiếp"
+      },
+      "unlock4": {
+        "title": "Lên cấp 4 — bò",
+        "where": "Tiếp tục thu hoạch"
+      }
+    },
+    "tutorial": {
+      "kicker": "Hướng dẫn",
+      "claim": "Nhận thưởng",
+      "claimable": "✓ Làm xong — nhận thưởng!",
+      "done": "🎉 Đã hoàn thành toàn bộ hướng dẫn — khám phá tự do!",
+      "step": "Bước {step}/14"
+    }
+  },
+  "cooking": {
+    "dialogLabel": "Bếp nấu",
+    "title": "Bếp Nhà — Nấu ăn",
+    "subtitle": "Nguyên liệu lấy từ kho & túi · món buff khi ăn",
+    "close": "Đóng",
+    "donePerfect": "HOÀN HẢO — món ×2!",
+    "doneGood": "Nấu xong!",
+    "doneMiss": "Hơi loneler… mất nửa nguyên liệu",
+    "tap": "Canh! (Space)",
+    "abandonTitle": "Bỏ nồi — không mất nguyên liệu",
+    "abandon": "Thôi",
+    "continueCooking": "Tiếp tục nấu",
+    "quickCook": "Nấu nhanh",
+    "minigameRounds": "Minigame {rounds} vòng",
+    "level": "Cấp {level}",
+    "cook": "Nấu",
+    "closeKitchen": "Đóng bếp"
+  },
+  "social": {
+    "title": "Bạn bè",
+    "friendInputPlaceholder": "User ID để kết bạn",
+    "addFriend": "Kết bạn",
+    "listHeading": "Danh sách ({count})",
+    "gift": "Tặng quà",
+    "visit": "Thăm",
+    "noFriends": "Chưa có bạn bè.",
+    "needLogin": "Đăng nhập để xem khách thăm (server-only data).",
+    "loadFailed": "Không tải được — thử lại sau. ({error})",
+    "loading": "Đang tải…",
+    "likesLabel": "Like",
+    "today": "Hôm nay",
+    "visits": "Lượt thăm",
+    "stickersReceived": "Sticker nhận được",
+    "noStickers": "Chưa có sticker nào.",
+    "guestbookTitle": "Sổ tay khách (50 gần nhất)",
+    "guestbookEmpty": "Chưa có lời nhắn — ghé thăm farm của bạn bè và để lại lời nhắn nhé!",
+    "updatedAt": "Cập nhật {time} · tự làm mới 30s",
+    "farmOf": "Farm của {name}",
+    "readOnly": "Chế độ xem chỉ đọc — không tương tác",
+    "likedCount": "{count} thích",
+    "like": "Thích",
+    "likedToday": "Đã thích hôm nay",
+    "likeFarm": "Thích farm này",
+    "oncePerDay": "1 lượt/ngày",
+    "sendSticker": "Gửi sticker {id}",
+    "guestbookPlaceholder": "Lời nhắn cho chủ farm (≤200 ký tự)",
+    "guestbookInputLabel": "Lời nhắn guestbook",
+    "sendGuestbook": "Gửi lời nhắn",
+    "close": "Đóng",
+    "stickerSent": "Đã gửi sticker!",
+    "guestbookSent": "Đã để lại lời nhắn!",
+    "giftFor": "Tặng {name}",
+    "cancel": "Hủy"
+  }
+}

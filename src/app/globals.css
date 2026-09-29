@@ -1,0 +1,1090 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-pixel: var(--font-pixel);
+  --font-vt323: var(--font-vt323);
+  --font-bungee: var(--font-bungee);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/*
+  Stardew-inspired earthy palette (warm, farmy greens/browns).
+  Overrides the neutral shadcn defaults while keeping variable names.
+*/
+:root {
+  --radius: 0.625rem;
+
+  /* Canvas / surfaces — warm parchment */
+  --background: #f6efe0;
+  --foreground: #3b2f23;
+
+  --card: #fffaf0;
+  --card-foreground: #3b2f23;
+  --popover: #fffaf0;
+  --popover-foreground: #3b2f23;
+
+  /* Primary — deep forest green */
+  --primary: #4e7d3a;
+  --primary-foreground: #fbf7ec;
+
+  /* Secondary — soft wheat */
+  --secondary: #ece0c8;
+  --secondary-foreground: #5a4a36;
+
+  --muted: #efe6d2;
+  /* #8a7a5e trên parchment ~3.8:1 → fail AA 4.5:1 cho text nhỏ. Nâng lên #6b5b45 (~5:1). */
+  --muted-foreground: #6b5b45;
+
+  /* Accent — harvest gold */
+  --accent: #e7b94e;
+  --accent-foreground: #4a3318;
+
+  --destructive: #c0452f;
+  --border: #d9c9a6;
+  --input: #d9c9a6;
+  --ring: #4e7d3a;
+
+  --chart-1: #4e7d3a;
+  --chart-2: #e7b94e;
+  --chart-3: #c0452f;
+  --chart-4: #6fa8dc;
+  --chart-5: #9b6b3a;
+
+  --sidebar: #efe2c4;
+  --sidebar-foreground: #3b2f23;
+  --sidebar-primary: #4e7d3a;
+  --sidebar-primary-foreground: #fbf7ec;
+  --sidebar-accent: #e7b94e;
+  --sidebar-accent-foreground: #4a3318;
+  --sidebar-border: #d2bf96;
+  --sidebar-ring: #4e7d3a;
+
+  /* Game-specific tokens */
+  --wood-frame: #6b4a2b;
+  --wood-frame-light: #8a6238;
+  --soil: #7a4f2b;
+  --grass-deep: #4e7d3a;
+
+  /* Raid tokens (audit M4 — 5 token) */
+  --night: #151b38;       /* raid overlay nền (indigo) */
+  --night-deep: #0c1126;  /* vignette + panel raid */
+  --mystic: #8b5cf6;      /* mask, heist UI — không dùng nơi khác */
+  --teal: #2f9e8f;        /* Stealth, bẫy/manh mối */
+  --alarm: #ff4438;       /* Alarm sáng hơn --danger, riêng trạng thái Alarm */
+
+  /* ------------------------------------------------------------------
+     Masked Farm semantic tokens (visual-design-specification.md).
+     Canonical day-side values; the single source of truth for the redesign.
+     Night-side values are scoped to raid mode surfaces in Phase 5. Phase 1 only
+     ESTABLISHES the contract — existing components still consume the legacy tokens
+     above until the Phase 2+ migration swaps them over.
+     ------------------------------------------------------------------ */
+  --mf-ink: #2f2116;
+  --mf-muted-ink: #6a5137;
+  --mf-paper: #f3e6c9;
+  --mf-paper-raised: #fff7e4;
+  --mf-frame: #4a3119;
+  --mf-wood: #6c4426;
+  --mf-leaf: #47783c;
+  --mf-harvest: #d99a2a;
+  --mf-danger: #b94639;
+  --mf-focus: #1d638f;
+  --mf-disabled: #c6b48d;
+
+  /* Canonical z-index layering (implementation-handoff-contract.md). Named tokens only —
+     no component invents a competing arbitrary z-* value. */
+  --z-canvas: 0;
+  --z-world-hint: 10;
+  --z-hud: 20;
+  --z-panel: 30;
+  --z-toast: 40;
+  --z-event: 45;
+  --z-modal: 50;
+  --z-mode: 60;
+}
+
+/* Masked Farm font utilities (verified Vietnamese — red-team #14) */
+.f-body { font-family: var(--font-vt323), "Courier New", monospace; }
+.f-display { font-family: var(--font-bungee), "Courier New", monospace; font-weight: 400; letter-spacing: .03em; }
+.f-num { font-family: var(--font-pixel), monospace; font-size: .7rem; letter-spacing: .02em; }
+/* CẢNH BÁO: .f-num (PS2P) chỉ cho số/icon-key KHÔNG dấu — thiếu diacritics Việt. Cấm cho text Việt. */
+
+.dark {
+  --background: #20211c;
+  --foreground: #f3ead4;
+  --card: #2a2a23;
+  --card-foreground: #f3ead4;
+  --popover: #2a2a23;
+  --popover-foreground: #f3ead4;
+  --primary: #7cb366;
+  --primary-foreground: #1b2114;
+  --secondary: #36362c;
+  --secondary-foreground: #f3ead4;
+  --muted: #323329;
+  --muted-foreground: #b3a487;
+  --accent: #e7b94e;
+  --accent-foreground: #2a1d05;
+  --destructive: #d9694e;
+  --border: #3f3e32;
+  --input: #3f3e32;
+  --ring: #7cb366;
+  --chart-1: #7cb366;
+  --chart-2: #e7b94e;
+  --chart-3: #d9694e;
+  --chart-4: #6fa8dc;
+  --chart-5: #c98a3a;
+  --sidebar: #26261f;
+  --sidebar-foreground: #f3ead4;
+  --sidebar-primary: #7cb366;
+  --sidebar-primary-foreground: #1b2114;
+  --sidebar-accent: #e7b94e;
+  --sidebar-accent-foreground: #2a1d05;
+  --sidebar-border: #3f3e32;
+  --sidebar-ring: #7cb366;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html, body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "ss01" on;
+  }
+}
+
+/* ---------- Game-specific utility classes ---------- */
+
+/* Pixel-art crisp rendering for canvas + sprites */
+.pixelated {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+/* Wooden panel look used by Feature Bar and HUD */
+.wood-panel {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.12)),
+    repeating-linear-gradient(
+      90deg,
+      var(--wood-frame) 0px,
+      var(--wood-frame-light) 6px,
+      var(--wood-frame) 12px
+    );
+  border: 2px solid #4a3119;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.25),
+    0 4px 10px rgba(0, 0, 0, 0.25);
+}
+
+.wood-panel-flat {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0.1)),
+    repeating-linear-gradient(
+      90deg,
+      var(--wood-frame) 0px,
+      var(--wood-frame-light) 5px,
+      var(--wood-frame) 10px
+    );
+  border: 2px solid #4a3119;
+}
+
+/* Parchment card used for panels */
+.parchment {
+  background:
+    radial-gradient(circle at 20% 10%, rgba(255, 255, 255, 0.5), transparent 40%),
+    linear-gradient(180deg, #fffaf0, #f3e8cf);
+  border: 1px solid #d2bf96;
+  box-shadow:
+    inset 0 0 24px rgba(154, 120, 70, 0.18),
+    0 8px 24px rgba(60, 40, 10, 0.25);
+}
+
+.slot {
+  background: linear-gradient(180deg, #efe2c4, #d8c69e);
+  border: 2px solid #6b4a2b;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -3px 0 rgba(0, 0, 0, 0.18);
+}
+.slot.selected {
+  border-color: #e3ae4d;
+  box-shadow:
+    inset 0 0 0 2px #e3ae4d,
+    inset 2px 2px 0 rgba(255, 236, 196, 0.35);
+}
+.slot.empty {
+  background: linear-gradient(180deg, #d8c69e, #c4b083);
+}
+
+/* Custom scrollbar for in-game scroll areas */
+.fancy-scroll::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.fancy-scroll::-webkit-scrollbar-track {
+  background: rgba(107, 74, 43, 0.15);
+  border-radius: 8px;
+}
+.fancy-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #8a6238, #6b4a2b);
+  border-radius: 8px;
+  border: 2px solid #d2bf96;
+}
+.fancy-scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #a07644, #7a5630);
+}
+
+/* Sliding panel animation */
+@keyframes slide-in-right {
+  from { transform: translateX(110%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+.animate-slide-in-right {
+  animation: slide-in-right 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes slide-in-up {
+  from { transform: translateY(40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.animate-slide-in-up {
+  animation: slide-in-up 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes pop-in {
+  0% { transform: scale(0.85); opacity: 0; }
+  60% { transform: scale(1.04); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.animate-pop-in {
+  animation: pop-in 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Toast slide */
+@keyframes toast-in {
+  from { transform: translateX(120%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+.animate-toast-in {
+  animation: toast-in 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* ChapterToast drop-in từ trên (toast trung tâm, không từ mép).
+   Wrapper đã flex-center nên KHÔNG dùng translateX(-50%) — chỉ dịch Y (review #2). */
+@keyframes slide-in-down {
+  from { transform: translateY(-16px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.animate-slide-in-down {
+  animation: slide-in-down 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Day-night overlay pulse for the viewport */
+.vignette {
+  box-shadow: inset 0 0 120px 20px rgba(0, 0, 0, 0.45);
+}
+
+/* Text shadow for HUD labels on game canvas */
+.hud-text {
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.45), 0 0 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Heart bounce */
+@keyframes heart-bump {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.25); }
+}
+.animate-heart-bump {
+  animation: heart-bump 0.5s ease-in-out;
+}
+
+/* shimmer for buttons */
+.btn-shine {
+  position: relative;
+  overflow: hidden;
+}
+.btn-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.35) 50%, transparent 70%);
+  transform: translateX(-120%);
+  transition: transform 0.6s;
+}
+.btn-shine:hover::after {
+  transform: translateX(120%);
+}
+
+/* feature bar icon button */
+.feature-btn {
+  position: relative;
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), filter 0.18s ease,
+    box-shadow 0.18s ease, background-color 0.18s ease;
+}
+.feature-btn:hover,
+.feature-btn:focus-visible {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+}
+.feature-btn:active {
+  transform: translateY(0) scale(0.96);
+}
+.feature-btn.active::before {
+  content: "";
+  position: absolute;
+  left: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 60%;
+  border-radius: 4px;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent);
+}
+
+/* ============================================================
+   MODULE A — Farm chrome (pixel wood, 2px frame, 4px corners)
+   ============================================================ */
+
+.farm-shell {
+  background: var(--mf-frame);
+  color: var(--mf-ink);
+}
+.farm-viewport {
+  background: #79bf56;
+  isolation: isolate;
+}
+.farm-viewport::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-world-hint);
+  box-shadow: inset 0 0 0 2px rgba(47, 33, 22, 0.35);
+}
+.farm-canvas-frame {
+  border: 0;
+  box-shadow: none;
+}
+
+/* Farm RPG HUD — light faces on grass, one chunky tray per corner, thick ink outline. */
+.rpg-wood-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  color: #2a1810;
+  border: 4px solid #1a0e08;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #f0d6a0 0%, #d4a05c 52%, #b07838 100%);
+  box-shadow:
+    4px 4px 0 #1a0e08,
+    inset 2px 2px 0 rgba(255, 244, 214, 0.7),
+    inset -2px -2px 0 rgba(90, 48, 16, 0.45);
+  image-rendering: pixelated;
+}
+.rpg-wood-btn:hover,
+.rpg-wood-btn:focus-visible {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+.rpg-wood-btn:active {
+  transform: translateY(2px);
+  box-shadow:
+    2px 2px 0 #1a0e08,
+    inset 2px 2px 0 rgba(90, 48, 16, 0.35);
+}
+.rpg-wood-btn-on {
+  box-shadow:
+    4px 4px 0 #1a0e08,
+    inset 0 0 0 3px #e3ae4d,
+    inset 2px 2px 0 rgba(255, 244, 214, 0.7);
+}
+.rpg-wood-btn-raid {
+  background: var(--mystic);
+  color: var(--mf-paper-raised);
+}
+.hud-burger {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 22px;
+}
+.hud-burger span {
+  display: block;
+  height: 4px;
+  background: #2a1810;
+  box-shadow: 0 1px 0 rgba(255, 244, 214, 0.45);
+}
+
+.hud-status {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  pointer-events: auto;
+  width: min(300px, calc(100vw - 2rem));
+  padding: 10px;
+  border: 4px solid #1a0e08;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #8a5630 0%, #5c3a22 62%, #3d2616 100%);
+  box-shadow:
+    4px 4px 0 #1a0e08,
+    inset 2px 2px 0 rgba(255, 220, 170, 0.22);
+  image-rendering: pixelated;
+}
+.hud-clock {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.hud-clock-copy {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.05;
+}
+.hud-clock-date,
+.hud-clock-time {
+  color: #fff7e4;
+  font-family: var(--font-vt323), monospace;
+  text-shadow: 2px 2px 0 #1a0e08;
+}
+.hud-clock-date { font-size: 20px; }
+.hud-clock-time { font-size: 28px; }
+.hud-clock-meta,
+.hud-clock-zone {
+  overflow: hidden;
+  color: #f0d9a8;
+  font-family: var(--font-vt323), monospace;
+  font-size: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.hud-gold {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 6px 10px;
+  border: 3px solid #1a0e08;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #f6e2b8, #d7b06a);
+  box-shadow: inset 2px 2px 0 rgba(255, 248, 220, 0.55);
+}
+.hud-coin {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  background-repeat: no-repeat;
+  background-size: 192px 32px;
+  background-position: 0 0;
+  image-rendering: pixelated;
+}
+.hud-gold-value {
+  color: #2a1810;
+  font-family: var(--font-pixel), monospace;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  text-shadow: 1px 1px 0 rgba(255, 244, 214, 0.8);
+}
+
+.hud-vitals {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 8px 8px 6px;
+  border: 4px solid #1a0e08;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #8a5630 0%, #5c3a22 100%);
+  box-shadow: 4px 4px 0 #1a0e08;
+  image-rendering: pixelated;
+}
+.hud-vital {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.hud-vital-icon {
+  width: 20px !important;
+  height: 20px !important;
+  filter: drop-shadow(1px 1px 0 #1a0e08);
+}
+.hud-vital:first-child .hud-vital-icon { color: #7ee05a; }
+.hud-vital:last-child .hud-vital-icon { color: #f0c964; }
+.hud-vital-well {
+  width: 18px;
+  height: 96px;
+  overflow: hidden;
+  border: 3px solid #1a0e08;
+  background: #140a06;
+  box-shadow: inset 1px 1px 0 rgba(255, 220, 170, 0.16);
+}
+.hud-vital-fill {
+  width: 100%;
+  height: 100%;
+  transform-origin: bottom center;
+  image-rendering: pixelated;
+}
+.daylight-fill {
+  background: linear-gradient(180deg, #ffe08a, #e39b2a);
+}
+
+.farm-shell[data-season="Spring"] {
+  --mf-leaf: #4e9a45;
+  --mf-harvest: #e39bb8;
+  --season-sky: #9fd4ff;
+  --season-ground: #6fb84a;
+  --season-canopy: #f4a7c3;
+}
+.farm-shell[data-season="Summer"] {
+  --mf-leaf: #3d8a28;
+  --mf-harvest: #f0b84a;
+  --season-sky: #5eb8ff;
+  --season-ground: #4fad3a;
+  --season-canopy: #2e8a32;
+}
+.farm-shell[data-season="Fall"] {
+  --mf-leaf: #c45c2a;
+  --mf-harvest: #e07a2a;
+  --season-sky: #ffc07a;
+  --season-ground: #c98a3a;
+  --season-canopy: #d97742;
+}
+.farm-shell[data-season="Winter"] {
+  --mf-leaf: #6a8eaa;
+  --mf-harvest: #9ec9e8;
+  --season-sky: #d8e8f8;
+  --season-ground: #e8f0f6;
+  --season-canopy: #f4f8fc;
+}
+
+.season-dial {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+  overflow: hidden;
+  border: 4px solid #1a0e08;
+  border-radius: 50%;
+  box-shadow: inset 3px 3px 0 rgba(255, 255, 255, 0.22);
+  image-rendering: pixelated;
+}
+.season-dial-sky,
+.season-dial-ground,
+.season-dial-tree {
+  position: absolute;
+  pointer-events: none;
+}
+.season-dial-sky {
+  inset: 0;
+  background: var(--season-sky, #9fd4ff);
+}
+.season-dial-ground {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 46%;
+  background: var(--season-ground, #6fb84a);
+}
+.season-dial-tree {
+  left: 22px;
+  bottom: 16px;
+  width: 14px;
+  height: 32px;
+  background: #593b27;
+  box-shadow: 12px -12px 0 8px var(--season-canopy, #f4a7c3);
+}
+.season-dial-glyph {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  width: 32px;
+  height: 32px;
+  background-repeat: no-repeat;
+  background-size: 320px 96px;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 0 0 #fff);
+}
+.season-dial-day {
+  position: absolute;
+  left: 8px;
+  top: 6px;
+  color: #2f2116;
+  font-family: var(--font-vt323), monospace;
+  font-size: 18px;
+  line-height: 1;
+  text-shadow: 1px 1px 0 #fff8e8;
+}
+.energy-track {
+  position: relative;
+  height: 14px;
+  overflow: hidden;
+  border: 2px solid var(--mf-frame);
+  border-radius: 0;
+  background: #3a2418;
+  box-shadow: inset 0 2px 0 rgba(0, 0, 0, 0.25);
+}
+.energy-fill { height: 100%; image-rendering: pixelated; }
+.energy-readout {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff7e4;
+  font-family: var(--font-pixel), monospace;
+  font-size: 8px;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 0 #2f2116;
+}
+
+.feature-dock {
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  z-index: var(--z-hud);
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 10px;
+}
+.feature-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.feature-dock-menu {
+  display: grid;
+  grid-template-columns: repeat(2, 56px);
+  gap: 8px;
+  padding: 10px;
+  border: 4px solid #1a0e08;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #8a5630 0%, #5c3a22 100%);
+  box-shadow: 4px 4px 0 #1a0e08;
+}
+.feature-menu-grid {
+  display: contents;
+}
+.feature-menu-divider {
+  grid-column: 1 / -1;
+  height: 2px;
+  background: var(--mf-frame);
+  opacity: 0.22;
+}
+.feature-btn-active {
+  box-shadow: inset 0 0 0 2px var(--mf-harvest);
+}
+.feature-dock .kbd {
+  background: var(--mf-paper);
+}
+
+.hotbar-tray {
+  border: 4px solid #1a0e08;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #7a4c2c, #4e3018);
+  box-shadow: 4px 4px 0 #1a0e08;
+  image-rendering: pixelated;
+}
+.hotbar-tray .slot {
+  border: 3px solid #1a0e08;
+  background: linear-gradient(180deg, #f3d7a4, #c99654);
+  box-shadow:
+    inset 2px 2px 0 rgba(255, 248, 220, 0.65),
+    inset -2px -2px 0 rgba(90, 48, 16, 0.35);
+}
+.hotbar-tray .slot.selected {
+  border-color: #1a0e08;
+  box-shadow:
+    inset 0 0 0 3px #e3ae4d,
+    inset 2px 2px 0 rgba(255, 248, 220, 0.65);
+}
+.hotbar-tray .slot.empty {
+  background: linear-gradient(180deg, #d8b078, #b07e44);
+}
+.hotbar-key {
+  color: #5a3a18;
+  font-family: var(--font-pixel), monospace;
+  font-size: 9px;
+  letter-spacing: 0;
+}
+.hotbar-qty {
+  min-width: 14px;
+  padding: 0 3px;
+  border: 1px solid var(--mf-frame);
+  border-radius: 2px;
+  background: var(--mf-paper);
+  color: var(--mf-ink);
+  font-family: var(--font-pixel), monospace;
+  font-size: 8px;
+  line-height: 14px;
+  text-align: center;
+}
+.hotbar-equipped {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 8px;
+  height: 8px;
+  border: 2px solid var(--mf-frame);
+  background: var(--mf-harvest);
+}
+
+.hud-quest {
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: min(200px, calc(100vw - 5.5rem));
+  padding: 8px 10px;
+  border: 4px solid #1a0e08;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #8a5630 0%, #5c3a22 62%, #3d2616 100%);
+  box-shadow:
+    4px 4px 0 #1a0e08,
+    inset 2px 2px 0 rgba(255, 220, 170, 0.22);
+  text-align: left;
+  image-rendering: pixelated;
+}
+.hud-quest-kicker {
+  font-family: var(--font-vt323), monospace;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #f0c964;
+  text-shadow: 2px 2px 0 #1a0e08;
+}
+.hud-quest-title {
+  font-family: var(--font-vt323), monospace;
+  font-size: 18px;
+  line-height: 1.1;
+  color: #fff7e4;
+  text-shadow: 2px 2px 0 #1a0e08;
+}
+.hud-quest-where {
+  font-family: var(--font-vt323), monospace;
+  font-size: 14px;
+  color: #efe2c4;
+  text-shadow: 1px 1px 0 #1a0e08;
+}
+.hud-quest-claimable {
+  border-color: #f0c964;
+  box-shadow:
+    4px 4px 0 #1a0e08,
+    inset 2px 2px 0 rgba(255, 220, 170, 0.22),
+    0 0 8px rgba(240, 201, 100, 0.45);
+}
+.hud-quest-claim {
+  margin-top: 2px;
+  align-self: stretch;
+  padding: 3px 8px;
+  font-family: var(--font-vt323), monospace;
+  font-size: 15px;
+  text-align: center;
+  text-transform: uppercase;
+  color: #1a0e08;
+  background: #f0c964;
+  border: 2px solid #1a0e08;
+  cursor: pointer;
+}
+.hud-quest-claim:hover {
+  background: #ffe08a;
+}
+
+@media (max-width: 767px) {
+  .hud-status { width: min(220px, calc(100vw - 1.25rem)); padding: 8px; }
+  .hud-clock-zone,
+  .hud-clock-meta { display: none; }
+  .hud-clock-date { font-size: 16px; }
+  .hud-clock-time { font-size: 22px; }
+  .season-dial { width: 56px; height: 56px; }
+  .hud-vital-well { width: 14px; height: 72px; }
+  .hud-gold-value { font-size: 12px; }
+}
+
+.start-screen {
+  background:
+    linear-gradient(180deg, rgba(47, 33, 22, 0.18), rgba(47, 33, 22, 0.42)),
+    #75b458 url("/assets/generated/spring-farm-overworld-v1.png") center / cover no-repeat;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+.start-screen-card {
+  width: 100%;
+  max-width: 28rem;
+  max-height: 92vh;
+  overflow-y: auto;
+  padding: 20px 20px 16px;
+  box-shadow: 4px 4px 0 rgba(47, 33, 22, 0.45);
+}
+.start-screen-title {
+  color: var(--mf-leaf);
+  font-family: var(--font-bungee), sans-serif;
+  font-size: 28px;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+.start-screen-subtitle {
+  margin-top: 6px;
+  color: var(--mf-muted-ink);
+  font-family: var(--font-vt323), monospace;
+  font-size: 18px;
+}
+.start-slot {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+}
+.start-slot-empty {
+  border-style: solid;
+  background: var(--mf-paper);
+}
+.start-slot-live {
+  background: var(--mf-paper-raised);
+}
+
+/* Pixel font utility (Press Start 2P). Use sparingly for labels/headings. */
+.font-pixel {
+  font-family: var(--font-pixel), var(--font-geist-sans), monospace;
+  letter-spacing: 0.02em;
+}
+.font-pixel-tight {
+  font-family: var(--font-pixel), var(--font-geist-sans), monospace;
+  letter-spacing: 0;
+}
+
+/* Floating HUD bar — solid wood pixel frame (visual-design-specification: NO gradient,
+// NO backdrop blur on functional UI; 2px frame + pixel offset shadow only). */
+.wood-hud {
+  background: var(--mf-wood);
+  border: 2px solid var(--mf-frame);
+  box-shadow:
+    2px 2px 0 rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* HUD pill — Stardew Pixel RPG Frame */
+.hud-pill {
+  background: var(--mf-paper-raised);
+  border: 2px solid var(--mf-frame);
+  box-shadow: 2px 2px 0 rgba(47, 33, 22, 0.35);
+}
+.hud-pill-dark {
+  background: linear-gradient(180deg, rgba(74, 49, 25, 0.85), rgba(58, 38, 19, 0.85));
+  border: 2px solid rgba(231, 185, 78, 0.5);
+  color: #fbf7ec;
+}
+
+/* Energy bar color tiers (paired with numeric label, never color alone) */
+.energy-fill-high { background: var(--mf-leaf); }
+.energy-fill-mid { background: var(--mf-harvest); }
+.energy-fill-low { background: var(--mf-danger); }
+.energy-fill-empty {
+  background: var(--mf-danger);
+  animation: energy-pulse 1.1s ease-in-out infinite;
+}
+@keyframes energy-pulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+/* Panel sliding in from the LEFT (docked beside the Feature Bar) */
+@keyframes slide-in-left {
+  from { transform: translateX(-115%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+.animate-slide-in-left {
+  animation: slide-in-left 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Backdrop fade for panels */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fade-in {
+  animation: fade-in 0.22s ease;
+}
+
+/* Rich tooltip card for hotbar/feature bar */
+.tip-card {
+  background: var(--mf-paper-raised);
+  border: 2px solid var(--mf-frame);
+  border-radius: 4px;
+  box-shadow: 3px 3px 0 rgba(47, 33, 22, 0.42);
+  padding: 8px 10px;
+  max-width: 220px;
+}
+
+/* Hotbar slot drag affordances */
+.slot.dragging {
+  opacity: 0.4;
+  transform: scale(1.05);
+  z-index: 50;
+}
+.slot.drop-target {
+  border-color: #6fa8dc;
+  box-shadow: 0 0 0 2px #6fa8dc, 0 0 14px rgba(111, 168, 220, 0.6);
+}
+.slot.over-swap {
+  transform: scale(1.08);
+}
+
+/* Soft hover lift for interactive chips */
+.lift-on-hover {
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.18s ease,
+    background-color 0.18s ease, border-color 0.18s ease;
+}
+.lift-on-hover:hover {
+  transform: translateY(-1px);
+}
+
+/* Keybind chip */
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.1rem;
+  padding: 0 0.3rem;
+  border-radius: 4px;
+  border: 1px solid #6b4a2b;
+  background: linear-gradient(180deg, #efe2c4, #d8c69e);
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.25);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 10px;
+  font-weight: 700;
+  color: #3b2f23;
+}
+
+/* Reduced motion: disable slide/pop/lighting animations */
+@media (prefers-reduced-motion: reduce) {
+  .animate-slide-in-left,
+  .animate-slide-in-right,
+  .animate-slide-in-up,
+  .animate-slide-in-down,
+  .animate-pop-in,
+  .animate-toast-in,
+  .animate-fade-in,
+  .animate-heart-bump,
+  .energy-fill-empty {
+    animation: none !important;
+  }
+  .feature-btn,
+  .lift-on-hover,
+  .btn-shine::after {
+    transition: none !important;
+  }
+  .btn-shine::after {
+    display: none !important;
+  }
+}
+
+/* ============================================================
+   MODULE F — Responsive, Accessibility & Touch
+   ============================================================ */
+
+/* Visible focus ring for keyboard navigation (AA contrast) */
+*:focus-visible {
+  outline: 3px solid #e7b94e;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+/* Remove default outline only when focus-visible is supported */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Ensure buttons have a visible focus ring even over dark backgrounds */
+button:focus-visible,
+[role="button"]:focus-visible,
+[role="tab"]:focus-visible,
+a:focus-visible {
+  outline: 3px solid #f0c964;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(231, 185, 78, 0.3);
+}
+
+/* High-contrast text for HUD labels on the glass bar */
+.wood-hud .hud-pill span,
+.wood-hud .hud-pill .font-pixel {
+  color: var(--mf-ink);
+}
+
+/* Range slider thumb focus */
+input[type="range"]:focus-visible {
+  outline: 2px solid #e7b94e;
+  outline-offset: 4px;
+}
+
+/* Touch-friendly tap targets: minimum 44×44px on interactive elements
+   below the md breakpoint (handled per-component, this is a safety net) */
+@media (max-width: 767px) {
+  button,
+  [role="button"],
+  [role="tab"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Prevent text selection on game UI (avoids accidental highlight during
+   rapid tapping on touch devices) */
+.no-select {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}

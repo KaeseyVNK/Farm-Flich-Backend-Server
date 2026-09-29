@@ -1,0 +1,71 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+/test-results/
+/playwright-report/
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+!.env.example
+/db/custom.db
+
+# vercel
+.vercel
+
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+local-*
+!src/lib/game/local-save-migrate.ts
+.claude
+.z-ai-config
+*.log
+dev.log
+dev.out.log
+test
+prompt
+
+server.log
+# Skills directory (gamedev skills — từ nguồn ngoài, re-fetch qua skills-lock.json)
+/skills/
+/.agents/
+# build artifacts
+dist/
+
+# Raw asset pack (license: KHÔNG redistribute — EmanuelleDev). Curated subset copied to public/assets/farm-rpg/ via scripts/copy-assets.mjs.
+Farm RPG - Tiny Asset Pack - (All in One)/
+
+# agent artifacts
+.next-e2e/
+.playwright-mcp/
+package-lock.json
+mini-services/raid-server/package-lock.json

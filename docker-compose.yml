@@ -1,0 +1,35 @@
+# Masked Farm — local-dev compose (audit deploy phase 7).
+# production deploy = roadmap (Supabase managed). Đây chỉ skeleton dev.
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: hgpp
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: test
+    ports:
+      - "5433:5432" # host 5433 → container 5432 (tránh đụng postgres local)
+    volumes:
+      - hgpp_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d hgpp"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Next.js web (port 3000) + raid-server (port 3001) chạy qua `npm run dev:all` locally.
+  # Production image build = roadmap. Skeleton dưới cho reference.
+  # web:
+  #   build: .
+  #   ports: ["3000:3000"]
+  #   env_file: .env.local
+  #   depends_on: [postgres]
+  # raid-server:
+  #   build: ./mini-services/raid-server
+  #   ports: ["3001:3001"]
+  #   env_file: .env.local
+
+volumes:
+  hgpp_pgdata:

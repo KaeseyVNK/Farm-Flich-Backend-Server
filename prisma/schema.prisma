@@ -1,0 +1,360 @@
+// Masked Farm — Prisma schema (postgresql)
+// Server-authoritative: gold (User) + Inventory. Farm JSONB giữ terrain/crops/objects/forage/shippingBoxes + gameMeta PHI-GOLD (day/season/time/energy/player/quests — audit C1).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+/// Supabase auth user (id == auth.users.id). Tạo qua trigger/handler, không insert trực tiếp.
+model User {
+  id           String   @id // == auth.users.id (uuid)
+  displayName  String?
+  isAnonymous  Boolean  @default(false)
+  linkedEmailAt DateTime?
+  gold         Int      @default(500) // server-authoritative (audit C1/L1: default cho user mới)
+  defenseXp    Int      @default(0)
+  defenseXpToday Int    @default(0) // daily cap 100 (phase 3 F3.3) — reset theo defenseXpDate
+  defenseXpDate DateTime? @db.Date // ngày (date-only UTC) defenseXpToday áp dụng
+  lastSeenAt   DateTime @default(now())
+  migratedAt   DateTime? // audit H7: flag migrated local→cloud
+  characterSetupRequired Boolean @default(false) // legacy users remain complete
+  usernameSetupRequired Boolean @default(false) // new Google accounts must set password alias
+  characterGender String?
+  characterAppearance Json?
+  createdAt    DateTime @default(now())
+
+  farm        Farm?
+  inventories Inventory[]
+  masks       Mask[]
+  defenses    DefenseConfig[]
+  raidsOwner  RaidSession[] @relation("raid_owner")
+  raidsThief  RaidSession[] @relation("raid_thief")
+  bountyPlaced  Bounty[]  @relation("bounty_owner")
+  bountyTarget  Bounty[]  @relation("bounty_thief")
+  losses      RaidLossDaily[]
+  progression UserProgression?
+  storyFlags  UserStoryFlags?
+  unityCredential UnityCredential?
+}
+
+/// Unity bridge credential — scrypt salt+hash (giống authStore UnityServer)
+/// và/hoặc Google link (email + googleSub). Google-only: salt/hash null.
+/// Centralized credential store cho Unity client (server-authoritative, không plaintext).
+model UnityCredential {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  salt         String?
+  hash         String?
+  email        String?  @unique
+  googleSub    String?  @unique
+  username     String?  @unique // login alias; userId remains the canonical playerId
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+/// Cloud-synced RPG progression (phase 6). RLS owner-only. Conflict: server-timestamp LWW.
+model UserProgression {
+  id        String @id @default(cuid())
+  userId    String @unique
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  level     Int    @default(1)
+  xp        Int    @default(0)
+  totalXp   Int    @default(0)
+  skillPoints Int  @default(0)
+  perkAllocations Json @default("{}") // {farming: N, combat: N, social: N}
+  friendship Json   @default("{}") // P2 #13: npc friendship local-only → cloud
+  version   Int    @default(0) // LWW conflict (ADR-005): tăng từ DB
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  @@index([userId])
+}
+
+/// Cloud-synced story flags (phase 7). RLS owner-only.
+model UserStoryFlags {
+  id        String @id @default(cuid())
+  userId    String @unique
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chapterId String @default("ch1")
+  nodeId    String @default("start")
+  visitedNodes Json @default("[]")
+  endingUnlocked Json @default("[]") // badges carry NG+ (Global Meta-Save redundant)
+  version   Int    @default(0)
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  @@index([userId])
+}
+
+/// 1 row/farm. JSONB cho terrain 3600 tile (60×60) + crops/objects/forage/shippingBoxes + gameMeta phi-gold.
+model Farm {
+  id        String   @id @default(cuid())
+  ownerId   String   @unique
+  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  terrain       Json // number[3600] — 60×60 tile codes (TILE_SIZE 48, MAP 60×60)
+  crops         Json     @default("{}") // {tileIdx: CropState}
+  objects       Json     @default("{}") // {tileIdx: PlacedObject}
+  forage        Json     @default("{}")
+  shippingBoxes Json     @default("{}") // audit C2
+  gameMeta      Json     @default("{}") // PHI-GOLD: day/season/year/timeMinutes/energy/player/quests — audit C1
+  /// W4: decor đã đặt (PlacedDecor[] — uid/defId/zone/tx/ty/rot/flip, đã sanitize client-side).
+  /// DECOR_STEALABLE=false — raid-server KHÔNG đọc (test decor-exclusion chốt).
+  placedDecor   Json     @default("[]")
+  /// Ao cá (fishId/daysGrown) — visit render dots; không phải silo.
+  pondFish      Json     @default("[]")
+  /// Unity bridge: full Unity FarmSaveDTO stored verbatim (lossless round-trip).
+  /// Client Unity pull đúng nguyên trạng; fallback adapt từ FarmSaveData khi rỗng.
+  unitySnapshot Json     @default("{}")
+  version       Int      @default(0)
+
+  shieldUntil      DateTime? // raid shield (30min/2h/24h)
+  dailyRaidCount   Int       @default(0) // audit H6
+  dailyRaidResetAt DateTime? // reset 24h
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  raids RaidSession[]
+
+  @@index([ownerId])
+}
+
+/// Server-authoritative inventory (delta validate, atomic).
+model Inventory {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  itemId String
+  qty    Int
+
+  @@unique([userId, itemId])
+  @@index([userId])
+}
+
+/// Mask — required for raid (concept §6). Trừ durability sau raid.
+model Mask {
+  id        String  @id @default(cuid())
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  maskId    String  // "rogue" | ... (roadmap: multi-effect)
+  durability Int    @default(10)
+  equipped  Boolean @default(false)
+
+  @@unique([userId, maskId])
+  @@index([userId])
+}
+
+/// Village chat (phase 8) — social lobby. Realtime INSERT broadcast.
+model VillageChat {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String
+  msg       String
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+/// Marketplace listing (phase 6). Partial buy → qty decrement; status active→sold khi qty=0.
+model Listing {
+  id         String   @id @default(cuid())
+  sellerId   String
+  itemId     String
+  qty        Int
+  priceUnit  Int
+  status     String   @default("active") // active|sold|cancelled|expired
+  createdAt  DateTime @default(now())
+  expiresAt  DateTime
+
+  @@index([itemId, status])
+  @@index([sellerId, status])
+}
+
+/// Trade history (phase 6). Fee 5% void (gold sink).
+model Trade {
+  id         String   @id @default(cuid())
+  buyerId    String
+  sellerId   String
+  itemId     String
+  qty        Int
+  priceUnit  Int
+  total      Int
+  fee        Int
+  createdAt  DateTime @default(now())
+
+  @@index([buyerId])
+}
+
+/// Friendship (phase 5) — canonical A<B (1 row/cặp). status: pending|accepted|blocked.
+model Friendship {
+  id          String   @id @default(cuid())
+  userAId     String   // canonical: A < B (sorted)
+  userBId     String
+  status      String   @default("pending")
+  initiatorId String
+  createdAt   DateTime @default(now())
+  acceptedAt  DateTime?
+
+  @@unique([userAId, userBId])
+  @@index([userAId])
+  @@index([userBId])
+}
+
+/// Gift audit log (phase 5). Daily cap 5/to/friend.
+model GiftLog {
+  id        String   @id @default(cuid())
+  fromId    String
+  toId      String
+  itemId    String
+  qty       Int
+  createdAt DateTime @default(now())
+
+  @@index([fromId, toId, createdAt])
+}
+
+/// Mask recipe (phase 4): công thức craft mask. Seeded app-side.
+model MaskRecipe {
+  id            String  @id @default(cuid())
+  maskId        String  @unique
+  tier          Int     @default(1)
+  ingredients   Json    @default("{}") // {itemId: qty}
+  goldCost      Int     @default(0)
+  durabilityCap Int     @default(10)
+}
+
+/// Defense config: chó tuần tra / hàng rào / trap.
+/// Trap ban đầu = roadmap (audit H5 — MVP chỉ seed dog), sau đó thêm ở FULL phase 1.
+/// W7d-P1: Danh tiếng 3 nhánh (§14) — farmer (ship/order), thief (raid exit/caught), guard (phòng thủ).
+/// Write chỉ qua RPC bump_reputation / bump_farmer_reputation (RLS: SELECT public).
+model Reputation {
+  userId    String   @id
+  farmer    Int      @default(0)
+  thief     Int      @default(0)
+  guard     Int      @default(0)
+  updatedAt DateTime @updatedAt @map("updatedAt") @db.Timestamptz(6)
+
+  @@map("Reputation")
+}
+
+model DefenseConfig {
+  id      String   @id @default(cuid())
+  userId  String
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  slot    Int
+  type    String   // dog | fence | trap
+  payload Json     @default("{}") // {level, ...}
+
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, slot, type])
+  @@index([userId])
+}
+
+/// Raid session — status atomic gate (red-team #2/#16). Partial unique index WHERE status='active' (audit M1) trong migration SQL.
+model RaidSession {
+  id         String   @id @default(cuid())
+  farmId     String
+  farm       Farm     @relation(fields: [farmId], references: [id])
+  ownerId    String
+  owner      User     @relation("raid_owner", fields: [ownerId], references: [id])
+  thiefId    String
+  thief      User     @relation("raid_thief", fields: [thiefId], references: [id])
+  status     String   @default("lobby") // lobby | active | resolved | aborted
+  resultJson Json?
+  /// Phase 9 C6: persist mapId + thiefMaskId cho replay re-sim chính xác (biome + mask effect).
+  mapId      String?
+  thiefMaskId String?
+  /// Phase 7 blood-moon raid: biome override (dog AI mạnh hơn). Persist cho replay re-sim.
+  bloodMoon  Boolean  @default(false)
+  /// W7d-P1: owner guard-rep >= 50 khi join → dog vision +1 tile. Persist cho replay re-sim.
+  guardBonus Boolean  @default(false)
+  /// W7 audit-fix (debt replay): snapshot DefenseConfig build lúc raid START —
+  /// dogs (breed/patrol/tile) + traps + levels + chests + enterTile. /replay re-sim
+  /// tick-exact thay vì default hardcode (1 dog giữa, 0 trap).
+  configSnapshot Json?
+  startedAt  DateTime?
+  endedAt    DateTime?
+  createdAt  DateTime @default(now())
+
+  events RaidEvent[]
+
+  @@index([farmId])
+  @@index([ownerId])
+  @@index([thiefId])
+  @@index([status])
+}
+
+/// Raid replay log — tick-based (replay roadmap: full re-sim). audit M2: unique (sessionId, tick, seq).
+model RaidEvent {
+  id        String   @id @default(cuid())
+  sessionId String
+  session   RaidSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  tick      Int
+  seq       Int
+  type      String // move | chestOpen | puzzleFail | puzzleSolve | dogBark | bite | alert | lockdown | exit
+  actorId   String
+  payload   Json     @default("{}")
+  createdAt DateTime @default(now())
+
+  @@unique([sessionId, tick, seq])
+  @@index([sessionId])
+}
+
+/// Daily loss cap tracking (per-raid 10%/category, per-day 25%) — atomic upsert.
+model RaidLossDaily {
+  id       String   @id @default(cuid())
+  ownerId  String
+  owner    User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  date     DateTime // ngày (date-only, 00:00 UTC)
+  category String   // outdoor | warehouse
+  amount   Int
+
+  @@unique([ownerId, date, category])
+  @@index([ownerId, date])
+}
+
+/// W7d-P3: Bảng truy nã (§14). Gold trừ ngay khi đặt, hoàn khi hủy (KHÔNG escrow).
+/// Write chỉ qua RPC place_bounty/cancel_bounty (RLS: SELECT public).
+model Bounty {
+  id        String   @id
+  ownerId   String
+  owner     User     @relation("bounty_owner", fields: [ownerId], references: [id], onDelete: Cascade)
+  thiefId   String
+  thief     User     @relation("bounty_thief", fields: [thiefId], references: [id], onDelete: Cascade)
+  gold      Int
+  status    String   @default("active") // active | cancelled | paid
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([thiefId, status])
+}
+
+/// W4 social: like farm bạn — 1 like / người / farm / ngày (UTC dayKey).
+model FarmLike {
+  id           String   @id @default(cuid())
+  farmOwnerId  String
+  visitorId    String
+  day          Int      // YYYYMMDD UTC — dedupe key
+  createdAt    DateTime @default(now())
+
+  @@unique([farmOwnerId, visitorId, day])
+  @@index([farmOwnerId])
+}
+
+/// W4 social: log ghé thăm — kind visit|like|sticker|guestbook. Chủ đọc (RLS friend/owner).
+model VisitLog {
+  id          String   @id @default(cuid())
+  farmOwnerId String
+  visitorId   String
+  kind        String   // "visit" | "like" | "sticker" | "guestbook"
+  stickerId   String?
+  message     String?  @db.Text
+  day         Int      // YYYYMMDD UTC
+  createdAt   DateTime @default(now())
+
+  @@index([farmOwnerId, createdAt])
+}

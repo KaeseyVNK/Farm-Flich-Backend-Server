@@ -1,0 +1,20 @@
+# raid-server bun image (phase 10 F10.4).
+# Multi-stage: build single binary → ship.
+# Review F11: copy bun.lock TRƯỚC install — --frozen-lockfile không có lockfile
+# trong layer = fail hoặc resolve fresh (không reproducible).
+FROM oven/bun:1.3 AS builder
+WORKDIR /app
+COPY mini-services/raid-server/package.json mini-services/raid-server/bun.lock ./mini-services/raid-server/
+WORKDIR /app/mini-services/raid-server
+RUN bun install --frozen-lockfile
+WORKDIR /app
+COPY mini-services/raid-server ./mini-services/raid-server
+RUN cd mini-services/raid-server && bun build src/index.ts --target=bun --outdir dist
+
+FROM oven/bun:1.3 AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+ENV RAID_PORT=3001
+COPY --from=builder /app/mini-services/raid-server/dist ./dist
+EXPOSE 3001
+CMD ["bun", "dist/index.js"]

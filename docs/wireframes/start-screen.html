@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wireframe — Start Screen (Masked Farm)</title>
+<style>
+  /* ===== Masked Farm design tokens (xem docs/design-guidelines.md) ===== */
+  :root{
+    --bg:#f6efe0; --surface:#fffaf0; --surface-2:#f3e8cf;
+    --primary:#4e7d3a; --accent:#e7b94e; --danger:#c0452f;
+    --gold:#d99a2a; --coin:#f0c964; --night:#151b38; --night-deep:#0c1126;
+    --mystic:#8b5cf6; --teal:#2f9e8f; --alarm:#ff4438; --ink:#3b2f23;
+    --ink-2:#6b5b45; --frame:#4a3119; --wood:#6b4a2b;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:VT323,'Courier New',monospace; font-size:17px;
+    min-height:100vh; padding:16px;
+  }
+  /* Display title/CTA → Bungee. Số/icon-key → Press Start 2P (không dấu tiếng Việt). */
+  .f-display{font-family:Bungee,'Courier New',monospace; font-weight:400; letter-spacing:.03em;}
+  .f-num{font-family:'Press Start 2P',monospace; font-size:11px; letter-spacing:.02em;}
+  .wf-tag{
+    font-family:'Courier New',monospace; font-size:11px; letter-spacing:.08em;
+    color:var(--ink-2); margin-bottom:12px; text-transform:uppercase;
+  }
+  .wf-tag b{color:var(--gold);}
+  .wf-note{
+    border:2px dashed var(--gold); background:var(--surface-2);
+    padding:8px 12px; font-size:12px; color:var(--ink-2); margin-bottom:16px;
+  }
+  /* ===== Stage ===== */
+  .stage{
+    position:relative; max-width:960px; min-height:540px; margin:0 auto;
+    border:2px solid var(--frame); border-radius:4px; overflow:hidden;
+    background:linear-gradient(180deg,#bfe3ff 0%,#cfe9c8 45%,#8fce4a 75%,#6fb84a 100%);
+    display:flex; align-items:center; justify-content:center;
+  }
+  /* ===== Backdrop pixel-art (sprite trang trí — sky/hills/grass) ===== */
+  .backdrop{position:absolute; inset:0; z-index:1; pointer-events:none;}
+  .bd-spr{
+    position:absolute; display:flex; flex-direction:column; align-items:center;
+    gap:2px; line-height:0; opacity:.9;
+  }
+  .bd-spr svg{display:block; image-rendering:pixelated;}
+  .bd-spr .lbl{
+    font-size:12px; line-height:1.2; color:var(--ink);
+    background:rgba(255,255,255,.6); border:1px solid rgba(74,49,25,.35);
+    border-radius:2px; padding:0 4px; white-space:nowrap;
+  }
+  .ent{font-size:34px; line-height:1; filter:drop-shadow(0 2px 2px rgba(0,0,0,.25));}
+  .ent.lg{font-size:46px;}
+  .ent.sm{font-size:26px;}
+  /* ===== Card ===== */
+  .card{
+    width:420px; max-width:calc(100vw - 48px);
+    background:var(--surface); border:2px solid var(--frame); border-radius:4px;
+    box-shadow:0 12px 32px rgba(60,40,10,.35);
+    padding:20px; display:flex; flex-direction:column; gap:12px;
+    z-index:2;
+  }
+  .logo{
+    text-align:center; font-family:Bungee,'Courier New',monospace; font-weight:400;
+    font-size:26px; color:var(--primary); letter-spacing:.04em;
+  }
+  .logo .mask{color:var(--gold);}
+  .logo-sub{
+    text-align:center; font-size:14px; letter-spacing:.24em; text-transform:uppercase;
+    color:var(--wood);
+  }
+  .card-title{font-size:13px; text-transform:uppercase; letter-spacing:.1em; color:var(--ink-2);}
+  /* ===== Buttons (block layout, đúng token) ===== */
+  .btn{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    border:2px solid var(--frame); border-radius:4px;
+    padding:14px 16px; font-size:18px; cursor:default;
+  }
+  .btn-primary{background:var(--primary); color:#fbf7ec;}
+  .btn-accent{background:var(--accent); color:var(--ink);}
+  .btn-ghost{background:var(--surface-2); color:var(--ink);}
+  /* CTA ĐI TRỘM → mystic; text trắng + viền đậm cho contrast ≥ AA trên nền tím */
+  .btn-mystic{background:var(--mystic); color:#fff; border:2px solid #5b3fd6;}
+  .btn:hover{transform:translateY(-2px); filter:brightness(1.08);}
+  .btn:active{transform:scale(.96);}
+  .kbd{
+    font-family:'Press Start 2P',monospace; font-size:10px;
+    background:#d8c69e; border:1px solid var(--wood); border-radius:2px; padding:0 5px;
+  }
+  /* ===== Save slot ===== */
+  .slot-row{
+    display:flex; align-items:center; gap:10px;
+    border:2px solid var(--primary); border-radius:4px; background:var(--surface);
+    padding:10px;
+  }
+  .slot-row.empty{border-style:dashed; border-color:#d2bf96; background:var(--surface-2);}
+  .slot-ico{
+    width:40px; height:40px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+    border:2px solid var(--wood); border-radius:4px; background:var(--surface-2);
+    font-size:18px;
+  }
+  .slot-name{font-size:13px; font-weight:800;}
+  .slot-meta{font-size:11px; color:var(--ink-2); margin-top:2px;}
+  .slot-meta b{color:var(--gold);}
+  .slot-btn{
+    margin-left:auto; border:2px solid var(--frame); border-radius:4px;
+    padding:6px 10px; font-size:11px; font-weight:800;
+  }
+  .slot-btn.load{background:var(--primary); color:#fbf7ec;}
+  .slot-btn.new{background:var(--accent); color:var(--ink);}
+  .slot-btn.del{background:#fbe4df; color:var(--danger); border-color:var(--danger);}
+  .divider{height:2px; background:#d2bf96; border-radius:2px;}
+  /* ===== Annote ===== */
+  .annotate{position:absolute; z-index:3; font-family:'Courier New',monospace; font-size:11px;
+    color:var(--ink); background:#fff; border:1px solid var(--wood); border-radius:2px; padding:3px 6px;
+    opacity:.9; pointer-events:none;}
+  .annotate::before{content:'↘ '; color:var(--gold);}
+  .a1{top:10px; left:10px;} .a2{top:10px; right:10px;} .a3{bottom:10px; left:10px;}
+</style>
+</head>
+<body>
+
+<p class="wf-tag">Wireframe 1/3 — <b>START SCREEN</b> · Masked Farm · token từ docs/design-guidelines.md</p>
+<p class="wf-note">Backdrop pixel-art (nông trại) + card login/farm select. 3 luồng entry: chơi ẩn danh → chọn farm → vào farm; hoặc nhánh "đi trộm" khi farm trống.</p>
+
+<div class="stage">
+  <!-- Annotate -->
+  <span class="annotate a1">Animated backdrop: sky → hills → grass + sprite nông trại</span>
+  <span class="annotate a2">CARD 420px · corner 4px · border 2px #4a3119</span>
+  <span class="annotate a3">Nếu cần: footer hint WASD/Space như game hiện tại</span>
+
+  <!-- Backdrop: pixel-art farm (sprite sinh bởi script) -->
+  <div class="backdrop" id="backdrop"></div>
+
+  <!-- Card -->
+  <div class="card">
+
+    <!-- Logo -->
+    <div>
+      <div class="logo">🎭 MASKED <span class="mask">FARM</span></div>
+      <div class="logo-sub">Pixel farm · Heist · Multiplayer</div>
+    </div>
+
+    <!-- Auth / anonymous entry -->
+    <div class="card-title">1 · Entry (ẩn danh)</div>
+    <button class="btn btn-accent f-display">▶ CHƠI NGAY — KHÔNG CẦN TÀI KHOẢN</button>
+    <div style="text-align:center; font-size:11px; color:var(--ink-2);">— hoặc —</div>
+    <button class="btn btn-ghost">Đăng nhập <span class="kbd">ENTER</span></button>
+
+    <div class="divider"></div>
+
+    <!-- Farm select -->
+    <div class="card-title">2 · Chọn farm (3 slot)</div>
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <div class="slot-row">
+        <div class="slot-ico">🌾</div>
+        <div>
+          <div class="slot-name">Farm 1</div>
+          <div class="slot-meta">Mùa Xuân · Ngày 3 · <b class="f-num">1.240g</b> · Bị trộm 2h trước (shield)</div>
+        </div>
+        <button class="slot-btn load">Load</button>
+      </div>
+      <div class="slot-row">
+        <div class="slot-ico">🌻</div>
+        <div>
+          <div class="slot-name">Farm 2</div>
+          <div class="slot-meta">Mùa Hạ · Ngày 12 · <b class="f-num">3.860g</b></div>
+        </div>
+        <button class="slot-btn load">Load</button>
+      </div>
+      <div class="slot-row empty">
+        <div class="slot-ico" style="color:var(--ink-2);">＋</div>
+        <div class="slot-name" style="color:var(--ink-2);">Trống — tạo farm mới</div>
+        <button class="slot-btn new">New</button>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Raid entry point — CTA ĐI TRỘM (mystic) -->
+    <div class="card-title">3 · Đi trộm</div>
+    <button class="btn btn-mystic f-display">🎭 ĐI TRỘM <span class="kbd">R</span></button>
+    <div style="font-size:14px; color:var(--ink-2);">
+      Dùng khi farm của bạn đang có shield/đang vắng → mở danh sách farm mục tiêu (bên ngoài phạm vi wireframe này).
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== Pixel-art sprite helper (giống farm-view) =====
+function px(map, pal, scale) {
+  const rows = map.trim().split('\n');
+  const h = rows.length, w = rows[0].length;
+  let rects = '';
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const c = pal[rows[y][x]];
+      if (!c) continue;
+      rects += '<rect x="' + (x * scale) + '" y="' + (y * scale) +
+               '" width="' + scale + '" height="' + scale + '" fill="' + c + '"/>';
+    }
+  }
+  return '<svg width="' + (w * scale) + '" height="' + (h * scale) +
+         '" viewBox="0 0 ' + (w * scale) + ' ' + (h * scale) +
+         '" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg">' + rects + '</svg>';
+}
+function bd(svg, left, top, label) {
+  const d = document.createElement('div');
+  d.className = 'bd-spr';
+  d.style.left = left; d.style.top = top;
+  d.innerHTML = svg + (label ? '<span class="lbl">' + label + '</span>' : '');
+  return d;
+}
+const TREES = { s: 5, pal: { G:'#4e7d3a', g:'#3a6b2a', T:'#6b4a2b' }, map: `
+...GGGGG...
+..GGGGGGG..
+..GgGGgGg..
+..GGGGGGG..
+..GGGGGGG..
+..GGGGGGG..
+....TTT....
+....TTT....
+....TTT....
+...TTTTT...` };
+const HOUSE = { s: 5, pal: { R:'#c0452f', W:'#c08a4a', D:'#8a4a2b', G:'#bfe3ff' }, map: `
+.....RRRR.....
+....RRRRRR....
+...RRRRRRRR...
+..RRRRRRRRRR..
+.RRRRRRRRRRRR.
+WWWWWWWWWWWWWW
+WWWWWWWWWWWWWW
+WWGWWWWWWGWWWW
+WWGWWWWWWGWWWW
+WWGDDDDDDGWWWW
+WWGDDDDDDGWWWW
+WWGDDDDDDGWWWW
+WWWWWWWWWWWWWW` };
+const CROPS = { s: 4, pal: { S:'#8a6238', G:'#4e7d3a', K:'#e7b94e' }, map: `
+SSSSSSSSSSSSSSSS
+S.K.K.K.K.K.K.S
+S.GGGGGGGGGGGG.S
+SSSSSSSSSSSSSSSS
+S.K.K.K.K.K.K.S
+S.GGGGGGGGGGGG.S
+SSSSSSSSSSSSSSSS` };
+const MASK = { s: 6, pal: { V:'#6a4cd8', v:'#8b5cf6', E:'#3b2f23' }, map: `
+..VVVVVVVV..
+.VVVVVVVVVV.
+VVVvVVVVvVVV
+VVEVVVVVVEVV
+VVEVVVVVVEVV
+.VVVVVVVVVV.
+..VVVVVVVV..
+...VVVVVV...` };
+
+const backdrop = document.getElementById('backdrop');
+backdrop.appendChild(bd(px(TREES.map, TREES.pal, TREES.s), '3%', '12%', ''));
+backdrop.appendChild(bd(px(TREES.map, TREES.pal, TREES.s), '82%', '14%', ''));
+backdrop.appendChild(bd(px(HOUSE.map, HOUSE.pal, HOUSE.s), '12%', '46%', 'Farm của bạn'));
+backdrop.appendChild(bd(px(CROPS.map, CROPS.pal, CROPS.s), '58%', '56%', ''));
+backdrop.appendChild(bd('<span class="ent sm">🐕</span>', '44%', '40%', ''));
+backdrop.appendChild(bd('<span class="ent">🐔</span>', '70%', '46%', ''));
+backdrop.appendChild(bd('<span class="ent lg">🧑‍🌾</span>', '38%', '34%', 'Chủ farm'));
+// Mặt nạ lớn trang trí phía trên-card (theme heist)
+backdrop.appendChild(bd(px(MASK.map, MASK.pal, MASK.s), '46%', '2%', 'Mặt nạ — heist'));
+</script>
+
+</body>
+</html>
