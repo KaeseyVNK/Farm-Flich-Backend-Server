@@ -3,9 +3,9 @@ import { cashPriceMilli } from "@/lib/unity/cash-catalog";
 
 const state = vi.hoisted(() => ({
   balance: BigInt(100000),
-  snapshot: null as unknown,
-  previous: null as unknown,
+  previous: null as null | Record<string, unknown>,
   debits: 0,
+  farmWrites: 0,
 }));
 
 vi.mock("@/lib/db", () => ({
@@ -20,12 +20,15 @@ vi.mock("@/lib/db", () => ({
         },
       },
       farm: {
-        findUnique: async () => ({ unitySnapshot: state.snapshot }),
-        update: async ({ data }: { data: { unitySnapshot: unknown } }) => { state.snapshot = data.unitySnapshot; },
+        findUnique: async () => { throw new Error("purchase must not read the Unity farm"); },
+        update: async () => { state.farmWrites++; },
       },
       cashPurchase: {
         findUnique: async () => state.previous,
-        create: async ({ data }: { data: unknown }) => { state.previous = data; },
+        create: async ({ data }: { data: Record<string, unknown> }) => {
+          state.previous = { id: "receipt0001", ...data };
+          return state.previous;
+        },
       },
     }),
   },
@@ -33,16 +36,11 @@ vi.mock("@/lib/db", () => ({
 
 import { CashPurchaseError, purchaseWithCash } from "@/lib/unity/cash-purchase";
 
-const farm = {
-  Profile: { PlayerId: "farmer", UnlockedRowCount: 2, UnlockedPlotIds: [1], LastSaveTimestamp: 1 },
-  Inventory: [],
-} as Parameters<typeof purchaseWithCash>[0]["farm"];
-
 beforeEach(() => {
   state.balance = BigInt(100000);
-  state.snapshot = null;
   state.previous = null;
   state.debits = 0;
+  state.farmWrites = 0;
 });
 
 describe("Unity Cash purchases", () => {
@@ -55,25 +53,27 @@ describe("Unity Cash purchases", () => {
     expect(cashPriceMilli("ITEM", "toString", 1)).toBeNull();
   });
 
-  it("debits once and replays a repeated request without granting twice", async () => {
+  it("debits once, returns a receipt and replays the same receipt without charging again", async () => {
     const input = { playerId: "farmer", requestId: "a".repeat(20), kind: "ITEM" as const,
-      targetId: "seed_potato", quantity: 2, farm };
+      targetId: "seed_potato", quantity: 2 };
     const first = await purchaseWithCash(input);
     const replay = await purchaseWithCash(input);
-    expect(first.balanceMilliCash).toBe(100000 - 576);
-    expect(first.farm).toMatchObject({ Inventory: [{ SlotIndex: 0, ItemId: "seed_potato", Quantity: 2 }] });
-    expect(replay.replayed).toBe(true);
+    expect(first).toMatchObject({ ok: true, receiptId: "receipt0001", playerId: "farmer", kind: "ITEM",
+      targetId: "seed_potato", quantity: 2, costMilli: 576, balanceMilliCash: 100000 - 576, replayed: false });
+    expect(first).not.toHaveProperty("farm");
+    expect(replay).toMatchObject({ receiptId: "receipt0001", replayed: true, costMilli: 576 });
     expect(state.debits).toBe(1);
+    expect(state.farmWrites).toBe(0);
     await expect(purchaseWithCash({ ...input, quantity: 3 }))
       .rejects.toMatchObject({ code: "REQUEST_CONFLICT" } satisfies Partial<CashPurchaseError>);
   });
 
-  it("rejects insufficient balance before changing a farm", async () => {
+  it("rejects insufficient balance without a debit or receipt", async () => {
     state.balance = BigInt(100);
     await expect(purchaseWithCash({ playerId: "farmer", requestId: "b".repeat(20),
-      kind: "ITEM", targetId: "seed_potato", quantity: 1, farm }))
+      kind: "ITEM", targetId: "seed_potato", quantity: 1 }))
       .rejects.toMatchObject({ code: "INSUFFICIENT_CASH" });
     expect(state.debits).toBe(0);
-    expect(state.snapshot).toBeNull();
+    expect(state.previous).toBeNull();
   });
 });

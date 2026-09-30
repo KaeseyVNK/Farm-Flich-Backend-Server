@@ -19,7 +19,6 @@ export async function POST(req: Request) {
       kind: body.kind as "ITEM" | "PLOT",
       targetId: body.targetId as string,
       quantity: body.quantity as number,
-      farm: body.farm as Parameters<typeof purchaseWithCash>[0]["farm"],
     });
     return NextResponse.json(result);
   } catch (error) {

@@ -92,6 +92,8 @@ export interface UnityFarmSaveDTO {
     UnlockedRowCount?: number;
     UnlockedPlotIds?: number[];
     LastSaveTimestamp?: number;
+    /** UnityServer-issued version (+1 per commit); orders cloud copies. */
+    FarmVersion?: number;
     Presence?: string;
     ShieldUntilTimestamp?: number;
     DefenseXP?: number;

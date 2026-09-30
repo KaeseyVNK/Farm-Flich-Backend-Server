@@ -125,22 +125,39 @@ export async function POST(req: Request) {
       skipDuplicates: true,
     });
 
+    // Cloud copies are ordered by UnityServer FarmVersion; a delayed or equal-version
+    // write never replaces a newer copy. Versionless (legacy) pushes fall back to the
+    // timestamp rule and never replace a versioned copy.
+    const incomingVersion = Number.isSafeInteger(dto.Profile.FarmVersion) && dto.Profile.FarmVersion! > 0
+      ? dto.Profile.FarmVersion!
+      : 0;
+    const incomingTimestamp = dto.Profile.LastSaveTimestamp ?? 0;
     const current = await db.farm.findUnique({ where: { ownerId: farmId }, select: { unitySnapshot: true } });
-    const currentTimestamp = Number((current?.unitySnapshot as UnityFarmSaveDTO | null)?.Profile?.LastSaveTimestamp ?? 0);
-    if (currentTimestamp > (dto.Profile.LastSaveTimestamp ?? 0)) {
+    const currentProfile = (current?.unitySnapshot as UnityFarmSaveDTO | null)?.Profile;
+    const currentVersion = Number(currentProfile?.FarmVersion ?? 0);
+    const currentTimestamp = Number(currentProfile?.LastSaveTimestamp ?? 0);
+    const stale = incomingVersion > 0
+      ? currentVersion >= incomingVersion
+      : currentVersion > 0 || currentTimestamp > incomingTimestamp;
+    if (stale) {
       return NextResponse.json({ ok: false, error: "STALE_UNITY_SNAPSHOT" }, { status: 409 });
     }
 
     const payload = adaptUnityFarmSave(dto);
     const version = await saveFarm(farmId, payload);
 
-    // Do not let a delayed save erase a Cash purchase committed after this snapshot.
-    const saved = await db.$executeRaw`
-      UPDATE "Farm" SET "unitySnapshot" = CAST(${JSON.stringify(dto)} AS jsonb)
-      WHERE "ownerId" = ${farmId}
-        AND COALESCE(("unitySnapshot"->'Profile'->>'LastSaveTimestamp')::bigint, 0)
-            <= ${dto.Profile.LastSaveTimestamp ?? 0}
-    `;
+    const saved = incomingVersion > 0
+      ? await db.$executeRaw`
+          UPDATE "Farm" SET "unitySnapshot" = CAST(${JSON.stringify(dto)} AS jsonb)
+          WHERE "ownerId" = ${farmId}
+            AND COALESCE(("unitySnapshot"->'Profile'->>'FarmVersion')::bigint, 0) < ${incomingVersion}
+        `
+      : await db.$executeRaw`
+          UPDATE "Farm" SET "unitySnapshot" = CAST(${JSON.stringify(dto)} AS jsonb)
+          WHERE "ownerId" = ${farmId}
+            AND ("unitySnapshot"->'Profile'->>'FarmVersion') IS NULL
+            AND COALESCE(("unitySnapshot"->'Profile'->>'LastSaveTimestamp')::bigint, 0) <= ${incomingTimestamp}
+        `;
     if (saved !== 1) {
       return NextResponse.json({ ok: false, error: "STALE_UNITY_SNAPSHOT" }, { status: 409 });
     }
