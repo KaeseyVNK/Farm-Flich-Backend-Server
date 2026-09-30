@@ -125,14 +125,25 @@ export async function POST(req: Request) {
       skipDuplicates: true,
     });
 
+    const current = await db.farm.findUnique({ where: { ownerId: farmId }, select: { unitySnapshot: true } });
+    const currentTimestamp = Number((current?.unitySnapshot as UnityFarmSaveDTO | null)?.Profile?.LastSaveTimestamp ?? 0);
+    if (currentTimestamp > (dto.Profile.LastSaveTimestamp ?? 0)) {
+      return NextResponse.json({ ok: false, error: "STALE_UNITY_SNAPSHOT" }, { status: 409 });
+    }
+
     const payload = adaptUnityFarmSave(dto);
     const version = await saveFarm(farmId, payload);
 
-    // Lossless copy: store the full Unity DTO for login-time pull.
-    await db.farm.update({
-      where: { ownerId: farmId },
-      data: { unitySnapshot: dto as unknown as import("@prisma/client").Prisma.InputJsonValue },
-    });
+    // Do not let a delayed save erase a Cash purchase committed after this snapshot.
+    const saved = await db.$executeRaw`
+      UPDATE "Farm" SET "unitySnapshot" = CAST(${JSON.stringify(dto)} AS jsonb)
+      WHERE "ownerId" = ${farmId}
+        AND COALESCE(("unitySnapshot"->'Profile'->>'LastSaveTimestamp')::bigint, 0)
+            <= ${dto.Profile.LastSaveTimestamp ?? 0}
+    `;
+    if (saved !== 1) {
+      return NextResponse.json({ ok: false, error: "STALE_UNITY_SNAPSHOT" }, { status: 409 });
+    }
 
     // Sync whitelisted inventory into the authoritative Inventory table.
     const migrated = [];

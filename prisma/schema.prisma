@@ -18,6 +18,7 @@ model User {
   isAnonymous  Boolean  @default(false)
   linkedEmailAt DateTime?
   gold         Int      @default(500) // server-authoritative (audit C1/L1: default cho user mới)
+  cashMilli    BigInt   @default(0) // 1 cash = 1000 units; Unity reads through the bridge
   defenseXp    Int      @default(0)
   defenseXpToday Int    @default(0) // daily cap 100 (phase 3 F3.3) — reset theo defenseXpDate
   defenseXpDate DateTime? @db.Date // ngày (date-only UTC) defenseXpToday áp dụng
@@ -41,6 +42,23 @@ model User {
   progression UserProgression?
   storyFlags  UserStoryFlags?
   unityCredential UnityCredential?
+  cashPurchases CashPurchase[]
+}
+
+/// Idempotency ledger for Unity purchases paid from User.cashMilli.
+model CashPurchase {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  requestId String
+  kind      String
+  targetId  String
+  quantity  Int
+  costMilli BigInt
+  createdAt DateTime @default(now())
+
+  @@unique([userId, requestId])
+  @@index([userId])
 }
 
 /// Unity bridge credential — scrypt salt+hash (giống authStore UnityServer)
