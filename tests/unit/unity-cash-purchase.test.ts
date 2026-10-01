@@ -49,6 +49,9 @@ describe("Unity Cash purchases", () => {
     expect(cashPriceMilli("ITEM", "item_chest_iron", 1)).toBe(2250);
     expect(cashPriceMilli("PLOT", "4", 1)).toBe(37800);
     expect(cashPriceMilli("PLOT", "5", 1)).toBe(108000);
+    expect(cashPriceMilli("ROW", "4", 1)).toBe(45000);
+    expect(cashPriceMilli("ROW", "3", 1)).toBeNull();
+    expect(cashPriceMilli("ROW", "4", 2)).toBeNull();
     expect(cashPriceMilli("ITEM", "seed_tomato", 1)).toBeNull();
     expect(cashPriceMilli("ITEM", "toString", 1)).toBeNull();
   });

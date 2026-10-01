@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { Prisma } from "@prisma/client";
-import { cashPriceMilli } from "@/lib/unity/cash-catalog";
+import { type CashKind, cashPriceMilli, isCashKind } from "@/lib/unity/cash-catalog";
 
 export class CashPurchaseError extends Error {
   constructor(public code: string, public status: number) { super(code); }
@@ -9,7 +9,7 @@ export class CashPurchaseError extends Error {
 type PurchaseInput = {
   playerId: string;
   requestId: string;
-  kind: "ITEM" | "PLOT";
+  kind: CashKind;
   targetId: string;
   quantity: number;
 };
@@ -22,7 +22,7 @@ export type CashReceipt = {
   ok: true;
   receiptId: string;
   playerId: string;
-  kind: "ITEM" | "PLOT";
+  kind: CashKind;
   targetId: string;
   quantity: number;
   costMilli: number;
@@ -32,7 +32,7 @@ export type CashReceipt = {
 
 export async function purchaseWithCash(input: PurchaseInput): Promise<CashReceipt> {
   if (!input.playerId || !/^[A-Za-z0-9_-]{16,100}$/.test(input.requestId) ||
-      (input.kind !== "ITEM" && input.kind !== "PLOT") || typeof input.targetId !== "string") {
+      !isCashKind(input.kind) || typeof input.targetId !== "string") {
     throw new CashPurchaseError("INVALID_REQUEST", 400);
   }
   const costMilli = cashPriceMilli(input.kind, input.targetId, input.quantity);

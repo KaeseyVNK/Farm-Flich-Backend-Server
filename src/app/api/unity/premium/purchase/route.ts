@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import type { CashKind } from "@/lib/unity/cash-catalog";
 import { CashPurchaseError, purchaseWithCash } from "@/lib/unity/cash-purchase";
 
 export async function POST(req: Request) {
@@ -16,7 +17,7 @@ export async function POST(req: Request) {
     const result = await purchaseWithCash({
       playerId,
       requestId: body.requestId as string,
-      kind: body.kind as "ITEM" | "PLOT",
+      kind: body.kind as CashKind,
       targetId: body.targetId as string,
       quantity: body.quantity as number,
     });
