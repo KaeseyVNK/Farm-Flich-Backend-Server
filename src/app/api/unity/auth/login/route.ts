@@ -55,10 +55,11 @@ export async function POST(req: Request) {
       ?? await db.unityCredential.findUnique({ where: { username } });
 
     if (!existing) {
-      if (!/^[a-z0-9_]{1,10}$/.test(username)) {
+      // Legacy IDs predate the username rule; UnityServer sends legacyVerified only after local scrypt proof.
+      const legacyVerified = body.legacyVerified === true;
+      if (!legacyVerified && !/^[a-z0-9_]{1,10}$/.test(username)) {
         return NextResponse.json({ ok: false, code: "INVALID_USERNAME", error: "Username must be 1–10 letters, numbers or underscores." }, { status: 400 });
       }
-      const legacyVerified = body.legacyVerified === true;
       const salt = crypto.randomBytes(16);
       const hash = scryptHash(password, salt);
       const registration = await db.$transaction(async tx => {

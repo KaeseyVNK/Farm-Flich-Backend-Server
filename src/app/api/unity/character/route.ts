@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
-import { parseCharacterSelection, storedCharacter } from "@/lib/unity/character-selection";
+import { parseCharacterSelection, parseLegacyCharacter, storedCharacter } from "@/lib/unity/character-selection";
 
 function authorized(req: Request): boolean {
   const token = process.env.BRIDGE_TOKEN;
@@ -10,6 +11,7 @@ function authorized(req: Request): boolean {
 function state(user: { characterSetupRequired: boolean; characterGender: string | null; characterAppearance: unknown }) {
   return {
     needsCharacterSetup: user.characterSetupRequired,
+    canChooseCharacter: user.characterSetupRequired || (user.characterGender === null && user.characterAppearance === null),
     character: storedCharacter(user.characterGender, user.characterAppearance),
   };
 }
@@ -31,22 +33,36 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   if (!authorized(req)) return NextResponse.json({ ok: false, code: "AUTH_REQUIRED" }, { status: 401 });
-  let body: { playerId?: unknown; character?: unknown };
+  let body: { playerId?: unknown; character?: unknown; legacy?: unknown };
   try { body = await req.json(); }
   catch { return NextResponse.json({ ok: false, code: "INVALID_CHARACTER_SELECTION" }, { status: 400 }); }
   const playerId = body && typeof body.playerId === "string" ? body.playerId.trim().toLowerCase() : "";
-  const character = parseCharacterSelection(body?.character);
+  const legacy = body?.legacy === true;
+  const character = legacy ? parseLegacyCharacter(body?.character) : parseCharacterSelection(body?.character);
   if (!playerId || !character) return NextResponse.json({ ok: false, code: "INVALID_CHARACTER_SELECTION" }, { status: 400 });
   try {
     const user = await db.user.findUnique({ where: { id: playerId }, select: {
       characterSetupRequired: true, characterGender: true, characterAppearance: true,
     } });
     if (!user) return NextResponse.json({ ok: false, code: "PLAYER_NOT_FOUND" }, { status: 404 });
-    if (user.characterSetupRequired) {
-      const { gender, ...appearance } = character;
+    const { gender, ...appearance } = character;
+    const oldAccountWithoutCharacter = !user.characterSetupRequired &&
+      user.characterGender === null && user.characterAppearance === null;
+    if (!legacy && (user.characterSetupRequired || oldAccountWithoutCharacter)) {
       const result = await db.user.updateMany({
-        where: { id: playerId, characterSetupRequired: true },
+        where: { id: playerId, OR: [
+          { characterSetupRequired: true },
+          { characterSetupRequired: false, characterGender: null, characterAppearance: { equals: Prisma.AnyNull } },
+        ] },
         data: { characterSetupRequired: false, characterGender: gender, characterAppearance: appearance },
+      });
+      if (result.count === 1) return NextResponse.json({ ok: true, needsCharacterSetup: false, character });
+    }
+    // Prisma reads both SQL NULL and JSON null back as null.
+    if (legacy && !user.characterSetupRequired && user.characterGender === null && user.characterAppearance === null) {
+      const result = await db.user.updateMany({
+        where: { id: playerId, characterSetupRequired: false, characterGender: null, characterAppearance: { equals: Prisma.AnyNull } },
+        data: { characterGender: gender, characterAppearance: appearance },
       });
       if (result.count === 1) return NextResponse.json({ ok: true, needsCharacterSetup: false, character });
     }

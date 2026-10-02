@@ -194,7 +194,7 @@ export function adaptUnityFarmSave(dto: UnityFarmSaveDTO): FarmSaveData {
   };
 }
 
-/** Unity inventory → farm-filch inventory deltas (whitelisted, capped 999). */
+/** Unity inventory → absolute farm-filch quantities (whitelisted, summed per item, capped 999). */
 export function adaptUnityInventory(dto: UnityFarmSaveDTO): { itemId: string; qty: number }[] {
   const out: { itemId: string; qty: number }[] = [];
   const seen = new Map<string, number>();

@@ -32,12 +32,20 @@ export async function saveFarm(userId: string, data: FarmSaveData): Promise<numb
   // Review M: lock-check + update trong 1 interactive transaction — trước đây
   // SELECT rồi UPDATE riêng (TOCTOU): raid start giữa 2 statement → owner save
   // đè state farm giữa raid. $transaction + FOR UPDATE serialize với join gate.
-  const updated = await db.$transaction(async (tx) => {
-    const active = await tx.$queryRaw<{ id: string }[]>`
-      SELECT id FROM "RaidSession" WHERE "farmId" = ${farm.id} AND status = 'active' FOR UPDATE`;
-    if (active.length > 0) throw new Error("farm locked: raid active");
-    return tx.farm.update({
-      where: { id: farm.id },
+  return db.$transaction((tx) => saveFarmInTx(tx, farm.id, data));
+}
+
+/** Raid guard + farm write inside the caller's transaction (no nested $transaction). */
+export async function saveFarmInTx(
+  tx: Prisma.TransactionClient,
+  farmId: string,
+  data: FarmSaveData,
+): Promise<number> {
+  const active = await tx.$queryRaw<{ id: string }[]>`
+    SELECT id FROM "RaidSession" WHERE "farmId" = ${farmId} AND status = 'active' FOR UPDATE`;
+  if (active.length > 0) throw new Error("farm locked: raid active");
+  const updated = await tx.farm.update({
+      where: { id: farmId },
       data: {
         terrain: data.terrain,
         crops: data.crops as Prisma.InputJsonValue,
@@ -65,7 +73,6 @@ export async function saveFarm(userId: string, data: FarmSaveData): Promise<numb
       },
       select: { version: true },
     });
-  });
   return updated.version;
 }
 

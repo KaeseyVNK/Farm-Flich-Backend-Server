@@ -46,6 +46,11 @@ export function parseCharacterSelection(value: unknown): CharacterSelection | nu
   return parseCharacter(value, false);
 }
 
+/** Legacy outfit migrated from a Unity farm; keeps a stored hair style of the other gender. */
+export function parseLegacyCharacter(value: unknown): CharacterSelection | null {
+  return parseCharacter(value, true);
+}
+
 export function storedCharacter(gender: string | null, appearance: unknown): CharacterSelection | null {
   if (!gender || !appearance || typeof appearance !== "object") return null;
   return parseCharacter({ ...(appearance as object), gender }, true);

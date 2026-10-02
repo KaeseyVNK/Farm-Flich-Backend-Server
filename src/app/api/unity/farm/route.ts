@@ -1,13 +1,17 @@
+import { isDeepStrictEqual } from "node:util";
 import { NextResponse } from "next/server";
+import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
-import { saveFarm } from "@/lib/game/farm-service";
+import { saveFarmInTx } from "@/lib/game/farm-service";
 import {
   adaptUnityFarmSave,
   adaptUnityInventory,
   adaptUnityFarmPull,
+  UNITY_ITEM_MAP,
   type UnityFarmSaveDTO,
 } from "@/lib/game/unity-adapter";
-import { updateInventory } from "@/lib/game/wallet-service";
+
+const UNITY_INVENTORY_ITEM_IDS = [...new Set(Object.values(UNITY_ITEM_MAP))];
 
 /**
  * Bridge: Unity client → UnityServer → farm-filch (this route).
@@ -103,73 +107,81 @@ export async function POST(req: Request) {
     );
   }
 
+  // Cloud copies are ordered by UnityServer FarmVersion; a delayed or equal-version
+  // write never replaces a newer copy. Versionless (legacy) pushes fall back to the
+  // timestamp rule and never replace a versioned copy.
+  const incomingVersion = Number.isSafeInteger(dto.Profile.FarmVersion) && dto.Profile.FarmVersion! > 0
+    ? dto.Profile.FarmVersion!
+    : 0;
+  const incomingTimestamp = dto.Profile.LastSaveTimestamp ?? 0;
+  const displayName = dto.Profile.PlayerName || farmId;
+  const inventory = adaptUnityInventory(dto);
+
   try {
-    // Ensure a User + Farm row exists (race-tolerant: concurrent create-time push
-    // and login push both call this — createMany skipDuplicates is idempotent).
-    await db.user.createMany({
-      data: [{ id: farmId, displayName: dto.Profile.PlayerName || farmId }],
-      skipDuplicates: true,
-    });
-    await db.farm.createMany({
-      data: [
-        {
-          ownerId: farmId,
-          terrain: new Array(3600).fill(0),
-          crops: {},
-          objects: {},
-          forage: {},
-          shippingBoxes: {},
-          gameMeta: {},
-        },
-      ],
-      skipDuplicates: true,
+    const result = await db.$transaction(async (tx) => {
+      // Ensure a User + Farm row exists (race-tolerant: concurrent create-time push
+      // and login push both call this — createMany skipDuplicates is idempotent).
+      await tx.user.createMany({
+        data: [{ id: farmId, displayName }],
+        skipDuplicates: true,
+      });
+      await tx.farm.createMany({
+        data: [
+          {
+            ownerId: farmId,
+            terrain: new Array(3600).fill(0),
+            crops: {},
+            objects: {},
+            forage: {},
+            shippingBoxes: {},
+            gameMeta: {},
+          },
+        ],
+        skipDuplicates: true,
+      });
+
+      // Row lock serializes concurrent pushes for this farm until commit.
+      const [current] = await tx.$queryRaw<{ id: string; version: number; unitySnapshot: unknown }[]>`
+        SELECT id, version, "unitySnapshot" FROM "Farm" WHERE "ownerId" = ${farmId} FOR UPDATE`;
+      const currentProfile = (current.unitySnapshot as UnityFarmSaveDTO | null)?.Profile;
+      const currentVersion = Number(currentProfile?.FarmVersion ?? 0);
+      const currentTimestamp = Number(currentProfile?.LastSaveTimestamp ?? 0);
+      if (incomingVersion > 0 && currentVersion === incomingVersion
+        && isDeepStrictEqual(current.unitySnapshot, dto)) {
+        return { version: current.version }; // identical retry: already applied
+      }
+      const stale = incomingVersion > 0
+        ? currentVersion >= incomingVersion
+        : currentVersion > 0 || currentTimestamp > incomingTimestamp;
+      if (stale) return null;
+
+      const version = await saveFarmInTx(tx, current.id, adaptUnityFarmSave(dto));
+      await tx.farm.update({
+        where: { id: current.id },
+        data: { unitySnapshot: dto as unknown as Prisma.InputJsonValue },
+      });
+
+      // Unity snapshot quantities are absolute: whitelisted items it omits are zeroed,
+      // non-Unity items are untouched.
+      for (const inv of inventory) {
+        await tx.inventory.upsert({
+          where: { userId_itemId: { userId: farmId, itemId: inv.itemId } },
+          create: { userId: farmId, itemId: inv.itemId, qty: inv.qty },
+          update: { qty: inv.qty },
+        });
+      }
+      const present = new Set(inventory.map((i) => i.itemId));
+      await tx.inventory.updateMany({
+        where: { userId: farmId, itemId: { in: UNITY_INVENTORY_ITEM_IDS.filter((id) => !present.has(id)) } },
+        data: { qty: 0 },
+      });
+      return { version };
     });
 
-    // Cloud copies are ordered by UnityServer FarmVersion; a delayed or equal-version
-    // write never replaces a newer copy. Versionless (legacy) pushes fall back to the
-    // timestamp rule and never replace a versioned copy.
-    const incomingVersion = Number.isSafeInteger(dto.Profile.FarmVersion) && dto.Profile.FarmVersion! > 0
-      ? dto.Profile.FarmVersion!
-      : 0;
-    const incomingTimestamp = dto.Profile.LastSaveTimestamp ?? 0;
-    const current = await db.farm.findUnique({ where: { ownerId: farmId }, select: { unitySnapshot: true } });
-    const currentProfile = (current?.unitySnapshot as UnityFarmSaveDTO | null)?.Profile;
-    const currentVersion = Number(currentProfile?.FarmVersion ?? 0);
-    const currentTimestamp = Number(currentProfile?.LastSaveTimestamp ?? 0);
-    const stale = incomingVersion > 0
-      ? currentVersion >= incomingVersion
-      : currentVersion > 0 || currentTimestamp > incomingTimestamp;
-    if (stale) {
+    if (!result) {
       return NextResponse.json({ ok: false, error: "STALE_UNITY_SNAPSHOT" }, { status: 409 });
     }
-
-    const payload = adaptUnityFarmSave(dto);
-    const version = await saveFarm(farmId, payload);
-
-    const saved = incomingVersion > 0
-      ? await db.$executeRaw`
-          UPDATE "Farm" SET "unitySnapshot" = CAST(${JSON.stringify(dto)} AS jsonb)
-          WHERE "ownerId" = ${farmId}
-            AND COALESCE(("unitySnapshot"->'Profile'->>'FarmVersion')::bigint, 0) < ${incomingVersion}
-        `
-      : await db.$executeRaw`
-          UPDATE "Farm" SET "unitySnapshot" = CAST(${JSON.stringify(dto)} AS jsonb)
-          WHERE "ownerId" = ${farmId}
-            AND ("unitySnapshot"->'Profile'->>'FarmVersion') IS NULL
-            AND COALESCE(("unitySnapshot"->'Profile'->>'LastSaveTimestamp')::bigint, 0) <= ${incomingTimestamp}
-        `;
-    if (saved !== 1) {
-      return NextResponse.json({ ok: false, error: "STALE_UNITY_SNAPSHOT" }, { status: 409 });
-    }
-
-    // Sync whitelisted inventory into the authoritative Inventory table.
-    const migrated = [];
-    for (const inv of adaptUnityInventory(dto)) {
-      const r = await updateInventory(farmId, inv.itemId, inv.qty);
-      migrated.push({ itemId: inv.itemId, qty: r.newQty });
-    }
-
-    return NextResponse.json({ ok: true, version, migratedInventory: migrated });
+    return NextResponse.json({ ok: true, version: result.version, migratedInventory: inventory });
   } catch (err) {
     console.error("[unity-bridge] save failed:", err);
     return NextResponse.json(
