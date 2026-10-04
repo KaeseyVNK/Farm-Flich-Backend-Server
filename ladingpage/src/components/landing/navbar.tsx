@@ -1,13 +1,17 @@
 "use client";
 
 import Image from "next/image";
-import { Menu, Play, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { EXTERNAL_LINKS, NAV_ITEMS } from "@/lib/landing-content";
+import { NAV_ITEMS } from "@/lib/landing-content";
+import { PlayGameButton } from "@/components/auth/play-button";
+import { bootAuthFromStorage, useAuthSnapshot } from "@/components/auth/session";
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const auth = useAuthSnapshot();
+  useEffect(() => { bootAuthFromStorage(); }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -29,18 +33,19 @@ export function Navbar() {
           <span className={`font-display text-xl font-extrabold tracking-tight md:text-2xl ${scrolled ? "text-[#f7edcf]" : "text-[#231b18]"}`}>Farm <span className="text-[#d97b2a]">&amp;</span> Filch</span>
         </a>
         <ul className="hidden items-center gap-1 lg:flex">
-          {NAV_ITEMS.map((item) => <li key={item.href}><a href={item.href} className={`inline-flex min-h-11 items-center rounded-sm px-3 text-sm font-extrabold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f7c948] ${linkClass}`}>{item.label}</a></li>)}
+          {[...NAV_ITEMS, { href: "buy-cash", label: "Cash" }, { href: "leaderboard", label: "Rank" }].map((item) => <li key={item.href}><a href={`/${item.href}`} className={`inline-flex min-h-11 items-center rounded-sm px-3 text-sm font-extrabold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f7c948] ${linkClass}`}>{item.label}</a></li>)}
         </ul>
         <div className="flex items-center gap-2">
-          <a href={EXTERNAL_LINKS.play} className="hidden min-h-11 items-center gap-2 border-[3px] border-[#231b18] bg-[#f7c948] px-4 font-display text-sm font-extrabold text-[#231b18] shadow-[3px_3px_0_#231b18] transition-transform hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#f7c948] sm:inline-flex"><Play className="size-4 fill-current" aria-hidden="true" />Play Now</a>
+          <a href="/login" className="inline-flex min-h-11 max-w-32 items-center px-2 text-sm font-extrabold focus-visible:outline focus-visible:outline-2"><span className="truncate">{auth.token ? auth.username : "Log in"}</span></a>
+          <PlayGameButton className="hidden min-h-11 items-center gap-2 border-[3px] border-[#231b18] bg-[#f7c948] px-4 font-display text-sm font-extrabold text-[#231b18] shadow-[3px_3px_0_#231b18] transition-transform hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#f7c948] sm:inline-flex" />
           <button type="button" onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-controls="mobile-nav" aria-label={open ? "Close navigation menu" : "Open navigation menu"} className="flex size-11 items-center justify-center border-[3px] border-[#231b18] bg-[#f7c948] text-[#231b18] shadow-[3px_3px_0_#231b18] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#f7c948] lg:hidden">
             {open ? <X className="size-5" aria-hidden="true" /> : <Menu className="size-5" aria-hidden="true" />}
           </button>
         </div>
       </nav>
       {open && <div id="mobile-nav" className="border-t-[3px] border-[#231b18] bg-[#181b31] lg:hidden"><ul className="mx-auto flex max-w-6xl flex-col gap-1 px-4 py-4">
-        {NAV_ITEMS.map((item) => <li key={item.href}><a href={item.href} onClick={() => setOpen(false)} className="flex min-h-11 items-center px-3 font-display text-base font-bold text-[#f7edcf] hover:bg-[#f7edcf]/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#f7c948]">{item.label}</a></li>)}
-        <li className="pt-2"><a href={EXTERNAL_LINKS.play} onClick={() => setOpen(false)} className="flex min-h-11 items-center justify-center gap-2 border-[3px] border-[#231b18] bg-[#f7c948] px-4 font-display text-base font-extrabold text-[#231b18] shadow-[3px_3px_0_#0d1020] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#f7c948]"><Play className="size-4 fill-current" aria-hidden="true" />Play Now</a></li>
+        {[...NAV_ITEMS, { href: "buy-cash", label: "Cash" }, { href: "leaderboard", label: "Rank" }].map((item) => <li key={item.href}><a href={`/${item.href}`} onClick={() => setOpen(false)} className="flex min-h-11 items-center px-3 font-display text-base font-bold text-[#f7edcf] hover:bg-[#f7edcf]/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#f7c948]">{item.label}</a></li>)}
+        <li className="pt-2"><PlayGameButton className="flex min-h-11 items-center justify-center gap-2 border-[3px] border-[#231b18] bg-[#f7c948] px-4 font-display text-base font-extrabold text-[#231b18] shadow-[3px_3px_0_#0d1020] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#f7c948]" /></li>
       </ul></div>}
     </header>
   );

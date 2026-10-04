@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getLeaderboard, type LeaderboardKind } from "@/lib/game/leaderboard-service";
+import { getLeaderboard, getLeaderboardMetadata, type LeaderboardKind } from "@/lib/game/leaderboard-service";
 
 /**
  * Unity bridge — public leaderboards (level + gold).
@@ -36,8 +36,11 @@ export async function GET(req: Request) {
   }
 
   try {
-    const entries = await getLeaderboard(kind as LeaderboardKind, limit);
-    return NextResponse.json({ ok: true, kind, entries });
+    const [entries, metadata] = await Promise.all([
+      getLeaderboard(kind as LeaderboardKind, limit),
+      getLeaderboardMetadata(kind as LeaderboardKind, url.searchParams.get("userId") || undefined),
+    ]);
+    return NextResponse.json({ ok: true, kind, entries, ...metadata });
   } catch (err) {
     console.error("[unity-leaderboard] failed:", err);
     return NextResponse.json({ ok: false, error: "leaderboard failed" }, { status: 500 });

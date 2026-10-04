@@ -1,6 +1,7 @@
 import Image from "next/image";
-import { MessageCircle, Play, Twitter } from "lucide-react";
+import { MessageCircle, Twitter } from "lucide-react";
 import { EXTERNAL_LINKS } from "@/lib/landing-content";
+import { PlayGameButton } from "@/components/auth/play-button";
 
 export function Hero() {
   return (
@@ -14,7 +15,7 @@ export function Hero() {
           <h1 className="mt-6 font-display text-5xl font-extrabold leading-[.94] tracking-tight text-[#231b18] sm:text-6xl lg:text-7xl">Grow. <span className="text-[#315b35]">Guard.</span>{" "}<span className="text-[#741f1b]">Filch.</span></h1>
           <p className="mt-6 max-w-lg text-base font-bold leading-relaxed text-[#3e2c25] md:text-lg">Build the farm you have always wanted, protect every hard-won harvest, and keep one eye on the neighbors—because they may come looking to steal it.</p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <a href={EXTERNAL_LINKS.play} className="inline-flex min-h-12 items-center justify-center gap-2 border-[4px] border-[#231b18] bg-[#f7c948] px-5 font-display text-lg font-extrabold text-[#231b18] shadow-[4px_4px_0_#231b18] transition-transform hover:-translate-y-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#231b18]"><Play className="size-5 fill-current" aria-hidden="true" />Play Now</a>
+            <PlayGameButton className="inline-flex min-h-12 items-center justify-center gap-2 border-[4px] border-[#231b18] bg-[#f7c948] px-5 font-display text-lg font-extrabold text-[#231b18] shadow-[4px_4px_0_#231b18] transition-transform hover:-translate-y-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#231b18]" />
             <a href="#trailer" className="inline-flex min-h-12 items-center justify-center gap-2 border-[4px] border-[#231b18] bg-[#f7edcf] px-5 font-display text-lg font-extrabold text-[#231b18] shadow-[4px_4px_0_#231b18] transition-transform hover:-translate-y-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#231b18]">See Game Preview</a>
           </div>
           <p className="mt-7 border-y-[3px] border-[#231b18] py-3 text-sm font-extrabold uppercase tracking-wide md:text-base">Free to play <span aria-hidden="true">·</span> Browser-based <span aria-hidden="true">·</span> No download required</p>

@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev -p 3000 2>&1 | tee dev.log",
-    "build": "next build && cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/",
+    "dev": "next dev --webpack -p 3000 2>&1 | tee dev.log",
+    "build": "next build --webpack && cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/",
     "start": "NODE_ENV=production bun .next/standalone/server.js 2>&1 | tee server.log",
     "lint": "eslint .",
     "db:push": "prisma db push --accept-data-loss",
@@ -79,7 +79,18 @@
     "vaul": "^1.1.2",
     "z-ai-web-dev-sdk": "^0.0.18",
     "zod": "^4.0.2",
-    "zustand": "^5.0.6"
+    "zustand": "^5.0.6",
+    "@particle-network/auth-core": "^2.1.1",
+    "@particle-network/authkit": "^2.1.1",
+    "@particle-network/wallet": "^2.1.1",
+    "@privy-io/chains": "^0.6.1",
+    "@privy-io/react-auth": "^3.46.0",
+    "@solana-program/memo": "^0.15.0",
+    "@solana/spl-token": "^0.4.15",
+    "@solana/web3.js": "^1.99.0",
+    "@web3auth/modal": "^11.4.2",
+    "bs58": "^6.0.0",
+    "viem": "^2.57.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

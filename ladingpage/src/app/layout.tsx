@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Baloo_2, Nunito } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
+import { WalletProviderMount } from "@/components/wallet/provider-mount";
 
 const baloo2 = Baloo_2({ variable: "--font-baloo", subsets: ["latin"], weight: ["400", "500", "600", "700", "800"] });
 const nunito = Nunito({ variable: "--font-nunito", subsets: ["latin"], weight: ["400", "500", "600", "700", "800", "900"] });
@@ -19,5 +20,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en" suppressHydrationWarning><body className={`${baloo2.variable} ${nunito.variable} antialiased bg-background text-foreground`}>{children}<Toaster /></body></html>;
+  return <html lang="en" suppressHydrationWarning><body className={`${baloo2.variable} ${nunito.variable} antialiased bg-background text-foreground`}><WalletProviderMount>{children}</WalletProviderMount><Toaster /></body></html>;
 }

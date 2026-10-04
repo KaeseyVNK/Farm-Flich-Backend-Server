@@ -43,6 +43,32 @@ model User {
   storyFlags  UserStoryFlags?
   unityCredential UnityCredential?
   cashPurchases CashPurchase[]
+  unityWallet UnityWallet?
+  cashDeposits CashDeposit[]
+}
+
+/// Verified immutable Solana wallet binding; identity stays User.id.
+model UnityWallet {
+  id String @id @default(cuid())
+  userId String @unique
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  address String @unique
+  createdAt DateTime @default(now())
+}
+
+/// Atomic credit receipt. One chain signature can credit one player only.
+model CashDeposit {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  network String
+  signature String
+  walletAddress String
+  amountRaw BigInt
+  creditedMilli BigInt
+  createdAt DateTime @default(now())
+  @@unique([network, signature])
+  @@index([userId])
 }
 
 /// Idempotency ledger for Unity purchases paid from User.cashMilli.
